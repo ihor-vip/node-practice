@@ -1,38 +1,52 @@
-const path = require('path');
-
-const {readFile, writeFile} = require('../helpers/user.builder');
-const pathDB = path.join(__dirname, '..', 'dataBase', 'users.json');
+const User = require('../dataBase/User');
 
 module.exports = {
     getUsers: async (req, res) => {
-        res.json(await readFile(pathDB));
+        try {
+            const users = await User.find();
+
+            res.json(users);
+        } catch (e) {
+            res.json(e.message);
+        }
     },
 
     getUserById: async (req, res) => {
-        const {user_id} = req.params;
-        const users = await readFile(pathDB);
-        const user = users.find(user => user.id === +user_id);
+        try {
+            const {id} = req.params;
+            const user = await User.findById(id);
 
-        res.json(user);
+            res.json(user);
+        } catch (e) {
+            res.json(e.message);
+        }
     },
 
     createUser: async (req, res) => {
-        const users = await readFile(pathDB);
-        const id = users[users.length - 1].id + 1;
+        try {
+            const newUser = await User.create(req.body);
 
-        users.push({...req.body, id});
-        await writeFile(pathDB,users);
-        res.json(users);
+            res.json(newUser);
+        } catch (e) {
+            res.json(e.message);
+        }
     },
 
     deleteUser: async (req, res) => {
-        const {user_id} = req.params;
+        try {
+            const {user_id} = req.params;
+            const users = await User.findOneAndDelete(user_id);
+            res.json(users);
+        } catch (e) {
+            res.json(e.message);
+        }
+    },
 
-        const users = await readFile(pathDB);
-        const newUsers = users.filter(user => user.id !== +user_id);
-
-        await writeFile(pathDB, newUsers);
-
-        res.json(newUsers);
+    authUsers: (req, res) => {
+        try {
+            res.json(`User logged in with the email ${req.body.email}`);
+        } catch (e) {
+            res.json(e.message);
+        }
     }
 };
