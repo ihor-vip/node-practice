@@ -40,13 +40,5 @@ module.exports = {
         } catch (e) {
             res.json(e.message);
         }
-    },
-
-    authUsers: (req, res) => {
-        try {
-            res.json(`User logged in with the email ${req.body.email}`);
-        } catch (e) {
-            res.json(e.message);
-        }
     }
 };
