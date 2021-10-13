@@ -1,13 +1,13 @@
-const {findUser, findUserById, findByEmail} = require('../services/userService');
-const {createUserValidator, updateUserValidator} = require('../validators/user.validator');
+const { userService } = require('../services');
+const { userValidator } = require('../validators');
 
 module.exports = {
-    isAllUserPresent: async (req, res, next) => {
+    isUsersExist: async (req, res, next) => {
         try {
-            const user = await findUser().lean();
+            const user = await userService.findUser().lean();
 
             if (!user) {
-                throw new Error('No user');
+                throw new Error('No users');
             }
 
             req.user = user;
@@ -17,11 +17,12 @@ module.exports = {
             res.json(e.message);
         }
     },
-    isUserPresent: async (req, res, next) => {
+
+    isOneUserExist: async (req, res, next) => {
         try {
             const {user_id} = req.params;
 
-            const user = await findUserById(user_id).lean();
+            const user = await userService.findUserById(user_id).lean();
 
             if (!user) {
                 throw new Error('No user');
@@ -35,11 +36,11 @@ module.exports = {
         }
     },
 
-    checkUniqueEmail: async (req, res, next) => {
+    isEmailExist: async (req, res, next) => {
         try {
             const {email} = req.body;
 
-            const userByEmail = await findByEmail(email);
+            const userByEmail = await userService.findUserByEmail(email);
 
             if (userByEmail) {
                 throw new Error('Email already exist');
@@ -51,9 +52,9 @@ module.exports = {
         }
     },
 
-    validateUserBody: (req, res, next) => {
+    validateUser: (req, res, next) => {
         try {
-            const {error} = createUserValidator.validate(req.body);
+            const {error} = userValidator.createUserValidator.validate(req.body);
 
             if (error) {
                 throw new Error('Can not validate request');
@@ -65,9 +66,9 @@ module.exports = {
         }
     },
 
-    validateUserBodyToUpdate: (req, res, next) => {
+    validateUserToUpdate: (req, res, next) => {
         try {
-            const {error} = updateUserValidator.validate(req.body);
+            const {error} = userValidator.updateUserValidator.validate(req.body);
 
             if (error) {
                 throw new Error('Can not validate request');

@@ -1,13 +1,13 @@
-const {login} = require('../validators/auth.validator');
-const {findByEmail} = require('../services/userService');
+const { authValidator } = require('../validators');
+const { userService } = require('../services');
 
 module.exports = {
     validateUser: (req, res, next) => {
         try {
-            const {error} = login.validate(req.body);
+            const {error} = authValidator.login.validate(req.body);
 
             if (error) {
-                throw new Error('Error');
+                throw new Error('Errorhh');
             }
 
             next();
@@ -16,11 +16,11 @@ module.exports = {
         }
     },
 
-    ifEmailExist: async (req, res, next) => {
+    isEmailExist: async (req, res, next) => {
         try {
             const {email} = req.body;
 
-            const userByEmail = await findByEmail(email);
+            const userByEmail = await userService.findUserByEmail(email);
 
             if (!userByEmail) {
                 throw new Error('Email already exist');

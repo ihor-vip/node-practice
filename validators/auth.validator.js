@@ -9,7 +9,7 @@ const login = Joi.object({
 
     email: Joi.string().regex(EMAIL_REGEX)
         .trim()
-        .required(),
+        .required()
 });
 
-module.exports = {login};
+module.exports = { login };
