@@ -1,5 +1,6 @@
-const { userService } = require('../services');
-const { userValidator } = require('../validators');
+const {userService} = require('../services');
+const {userValidator} = require('../validators');
+const {ErrorHandler, ErrorStatus, ErrorMessages} = require('../errors');
 
 module.exports = {
     isUsersExist: async (req, res, next) => {
@@ -7,14 +8,14 @@ module.exports = {
             const user = await userService.findUser().lean();
 
             if (!user) {
-                throw new Error('No users');
+                throw new ErrorHandler(ErrorStatus.CONFLICT, ErrorMessages.NO_CONTENT_MESSAGE);
             }
 
             req.user = user;
 
             next();
         } catch (e) {
-            res.json(e.message);
+            next(e);
         }
     },
 
@@ -25,7 +26,7 @@ module.exports = {
             const user = await userService.findUserById(user_id).lean();
 
             if (!user) {
-                throw new Error('No user');
+                throw new ErrorHandler(ErrorStatus.CONFLICT, ErrorMessages.NO_CONTENT_MESSAGE);
             }
 
             req.user = user;
@@ -43,7 +44,7 @@ module.exports = {
             const userByEmail = await userService.findUserByEmail(email);
 
             if (userByEmail) {
-                throw new Error('Email already exist');
+                throw new ErrorHandler(ErrorStatus.CONFLICT, ErrorMessages.EMAIL_IS_ALREADY_EXIST);
             }
 
             next();
@@ -57,12 +58,12 @@ module.exports = {
             const {error} = userValidator.createUserValidator.validate(req.body);
 
             if (error) {
-                throw new Error('Can not validate request');
+                throw new ErrorHandler(ErrorStatus.CONFLICT, ErrorMessages.ENTITY_NOT_FOUND);
             }
 
             next();
         } catch (e) {
-            res.json(e.message);
+            next(e);
         }
     },
 
@@ -71,12 +72,12 @@ module.exports = {
             const {error} = userValidator.updateUserValidator.validate(req.body);
 
             if (error) {
-                throw new Error('Can not validate request');
+                throw new ErrorHandler(ErrorStatus.CONFLICT, ErrorMessages.ENTITY_NOT_FOUND);
             }
 
             next();
         } catch (e) {
-            res.json(e.message);
+            next();
         }
     }
 };

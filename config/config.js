@@ -1,5 +1,5 @@
 module.exports = {
-    PORT: 5000,
+    PORT: process.env.Port || 5000,
 
-    MONGO_CONNECT: 'mongodb://localhost:27017/june-2021',
+    MONGO_CONNECT: process.env.MONGO_CONNECT || 'mongodb://localhost:27017/june-2021'
 };

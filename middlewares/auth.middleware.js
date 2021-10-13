@@ -1,35 +1,37 @@
-const { authValidator } = require('../validators');
-const { userService } = require('../services');
+const passwordService = require('../services/password.service');
+const User = require('../dataBase/User');
+const {ErrorHandler, ErrorStatus, ErrorMessages} = require('../errors');
 
 module.exports = {
-    validateUser: (req, res, next) => {
+    validateUser: async (req, res, next) => {
         try {
-            const {error} = authValidator.login.validate(req.body);
-
-            if (error) {
-                throw new Error('Errorhh');
-            }
-
-            next();
-        } catch (e) {
-            res.json(e.message);
-        }
-    },
-
-    isEmailExist: async (req, res, next) => {
-        try {
-            const {email} = req.body;
-
-            const userByEmail = await userService.findUserByEmail(email);
+            const userByEmail = await User
+                .findOne({email: req.body.email})
+                .select('+password')
+                .lean();
 
             if (!userByEmail) {
-                throw new Error('Email already exist');
+                throw new ErrorHandler(ErrorStatus.CONFLICT, ErrorMessages.EMAIL_OR_PASSWORD_IS_WRONG);
             }
 
             req.user = userByEmail;
+
             next();
         } catch (e) {
-            res.json(e.message);
+            next(e);
+        }
+    },
+
+    isPasswordsMatched: async (req, res, next) => {
+        try {
+            const {password} = req.body;
+            const {password: hashPassword} = req.user;
+
+            await passwordService.compare(password, hashPassword);
+
+            next();
+        } catch (e) {
+            next(e);
         }
     }
 };

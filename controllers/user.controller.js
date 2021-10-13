@@ -1,63 +1,65 @@
 const User = require('../dataBase/User');
-const { passwordService } = require('../services');
-const { userNormalizator } = require('../util/user.util');
+const {hash} = require('../services/password.service');
+const {userNormalizator} = require('../util/user.util');
+const {CREATED, NO_CONTENT} = require('../errors/Error.status');
 
 module.exports = {
-    getUsers: async (req, res) => {
+    getUsers: async (req, res, next) => {
         try {
             const users = await User.find().lean();
             const usersNormalize = users.map((user) => userNormalizator(user));
 
             res.json(usersNormalize);
         } catch (e) {
-            res.json(e.message);
+            next(e);
         }
     },
 
-    getUserById: (req, res) => {
+    getUserById: (req, res, next) => {
         try {
             let user = req.user;
             user = userNormalizator(user);
 
             res.json({user});
         } catch (e) {
-            res.json(e.message);
+            next(e);
         }
     },
 
-    createUser: async (req, res) => {
+    createUser: async (req, res, next) => {
         try {
-            const hashPassword = await passwordService.hash(req.body.password);
+            const hashPassword = await hash(req.body.password);
 
-            await User.create({...req.body, password: hashPassword});
+            const newUser = await User.create({...req.body, password: hashPassword});
 
-            res.end('User is added');
+            const user = userNormalizator(newUser);
+            res.status(CREATED).json(user);
         } catch (e) {
-            res.json(e.message);
+            next(e);
         }
     },
 
-    updateUser: async (req, res) => {
+    updateUser: async (req, res, next) => {
         try {
             const {user_id} = req.params;
             let user = await User.findByIdAndUpdate(user_id, req.body).lean();
             user = userNormalizator(user);
 
-            res.json(user);
+            res.status(CREATED).json(user);
         } catch (e) {
-            res.json(e.message);
+            next(e);
         }
     },
 
-    deleteUser: async (req, res) => {
+    deleteUser: async (req, res, next) => {
         try {
             const {user_id} = req.params;
             let deleteUser = await User.findByIdAndDelete(user_id).lean();
             deleteUser = userNormalizator(deleteUser);
 
-            res.json(deleteUser);
+            res.status(NO_CONTENT).json(deleteUser);
         } catch (e) {
-            res.json(e.message);
+            next(e);
         }
     }
 

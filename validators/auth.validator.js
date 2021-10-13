@@ -12,4 +12,4 @@ const login = Joi.object({
         .required()
 });
 
-module.exports = { login };
+module.exports = {login};
