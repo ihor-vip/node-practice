@@ -1,4 +1,3 @@
-const User = require('../dataBase/User');
 const {userNormalizator} = require("../util/user.util");
 
 module.exports = {
@@ -12,15 +11,5 @@ module.exports = {
         } catch (e) {
             next(e);
         }
-    },
-
-    logout: async (req, res, next) => {
-        try {
-            const users = await User.find();
-
-            res.json(users);
-        } catch (e) {
-            next(e);
-        }
-    },
+    }
 };
