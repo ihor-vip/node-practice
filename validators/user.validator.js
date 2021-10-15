@@ -30,14 +30,4 @@ const updateUserValidator = Joi.object({
     email: Joi.string().trim()
 });
 
-const login = Joi.object({
-    password: Joi.string().regex(PASSWORD_REGEX)
-        .trim()
-        .required(),
-
-    email: Joi.string().regex(EMAIL_REGEX)
-        .trim()
-        .required()
-});
-
-module.exports = {createUserValidator, updateUserValidator, login};
+module.exports = {createUserValidator, updateUserValidator};

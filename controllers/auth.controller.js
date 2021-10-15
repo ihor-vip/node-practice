@@ -1,15 +1,11 @@
-const {userNormalizator} = require("../util/user.util");
+const userUtil = require('../util/user.util');
 
 module.exports = {
-    login: (req, res, next) => {
-        try {
-            const {user} = req;
+    login: (req, res) => {
+        const user = req.user;
 
-            const userNormalized = userNormalizator(user);
+        const normalizedUser = userUtil.userNormalizator(user.toObject());
 
-            res.json(userNormalized);
-        } catch (e) {
-            next(e);
-        }
+        res.json(normalizedUser);
     }
 };
