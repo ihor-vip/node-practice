@@ -1,18 +1,21 @@
-const User = require('../dataBase/User');
-const {compare} = require('../services/password.service');
-const {authValidator} = require('../validators');
-const {ErrorHandler, ErrorStatus, ErrorMessages} = require('../errors');
+const {User} = require('../dataBase');
 
-module.exports = {
-    isLoginValid: (req, res, next) => {
+const {
+    ErrorHandler,
+    ErrorStatus: {BAD_REQUEST, NOT_FOUND},
+    ErrorMessages: {BAD_DATA, WRONG_AUTH}
+} = require('../errors');
+
+const {userValidator: {loginValidator}} = require('../validators');
+
+const authenticationMiddleware = {
+    verifyUserLogin: (req, res, next) => {
         try {
-            const {error, value} = authValidator.loginValidator.validate(req.body);
+            const {error} = loginValidator.validate(req.body);
 
             if (error) {
-                throw new ErrorHandler(ErrorStatus.CONFLICT, ErrorMessages.NO_CONTENT_MESSAGE);
+                throw new ErrorHandler(BAD_REQUEST, BAD_DATA);
             }
-
-            req.body = value;
 
             next();
         } catch (e) {
@@ -20,23 +23,22 @@ module.exports = {
         }
     },
 
-    loginMiddleware: async (req, res, next) => {
+    emailValidation: async (req, res, next) => {
         try {
-            const {email, password} = req.body;
+            const {email} = req.body;
+            const savedData = await User.findOne({email})
+                .select('+password');
 
-            const userExist = await User.findOne({email}).select('+password');
-
-            if (!userExist) {
-                throw new ErrorHandler(ErrorStatus.CONFLICT, ErrorMessages.NO_CONTENT_MESSAGE);
+            if (!savedData) {
+                throw new ErrorHandler(NOT_FOUND, WRONG_AUTH);
             }
 
-            await compare(password, userExist.password);
-
-            req.user = userExist;
-
+            req.user = savedData;
             next();
         } catch (e) {
             next(e);
         }
-    }
+    },
 };
+
+module.exports = authenticationMiddleware;

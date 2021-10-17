@@ -1,11 +1,13 @@
-const errorMessages = {
-    ENTITY_NOT_FOUND: 'Entity Not found',
+module.exports = {
+    BAD_DATA: 'Incorrect data',
+    EMPTY_BASE: 'Empty base',
+    NO_DATA: 'Missing data',
+    NOT_FOUND_M: 'Not found',
 
-    EMAIL_IS_ALREADY_EXIST: 'Email is already exist',
+    EMAIL_CONFLICT: 'Such email exist',
+    WRONG_AUTH: 'Email or password is wrong',
+    WRONG_ID: 'Invalid ID',
 
-    EMAIL_OR_PASSWORD_IS_WRONG: 'Email or password is wrong',
-
-    NO_CONTENT_MESSAGE: 'There is no content to respond to the request'
+    USER_UPDATED: 'User info updated',
+    USER_DELETED: 'User was deleted'
 };
-
-module.exports = errorMessages;

@@ -1,11 +1,21 @@
-const userUtil = require('../util/user.util');
+const {passwordService: {compare}} = require('../services');
 
-module.exports = {
-    login: (req, res) => {
-        const user = req.user;
+const authenticationController = {
+    userLogin: async (req, res, next) => {
+        try {
+            const {
+                body: {password},
+                user
+            } = req;
+            const user_id = JSON.parse(JSON.stringify(user._id));
 
-        const normalizedUser = userUtil.userNormalizator(user.toObject());
+            await compare(password, user.password);
 
-        res.json(normalizedUser);
+            res.redirect(`users/${user_id}`);
+        } catch (e) {
+            next(e);
+        }
     }
 };
+
+module.exports = authenticationController;

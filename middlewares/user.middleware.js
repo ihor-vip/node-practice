@@ -1,34 +1,27 @@
-const User = require('../dataBase/User');
-const {createUserValidator, updateUserValidator} = require('../validators/user.validator');
-const {ErrorHandler, ErrorStatus, ErrorMessages} = require('../errors');
+const {User} = require('../dataBase');
+
+const {
+    ErrorHandler,
+    ErrorMessages: {BAD_DATA, WRONG_AUTH},
+    ErrorStatus: {BAD_REQUEST, CONFLICT}
+} = require('../errors');
+
+const {
+    userValidator: {
+        createUserValidator,
+        updateUserValidator
+    }
+} = require('../validators');
 
 module.exports = {
-    isOneUserExist: async (req, res, next) => {
-        try {
-            const {user_id} = req.params;
 
-            const user = await User.findById(user_id);
-
-            if (!user) {
-                throw new ErrorHandler(ErrorStatus.CONFLICT, ErrorMessages.NO_CONTENT_MESSAGE);
-            }
-
-            req.user = user;
-
-            next();
-        } catch (e) {
-            next(e);
-        }
-    },
-
-    isEmailExist: async (req, res, next) => {
+    emailValidation: async (req, res, next) => {
         try {
             const {email} = req.body;
+            const emailSaved = await User.findOne({email});
 
-            const userByEmail = await User.findOne({email});
-
-            if (userByEmail) {
-                throw new ErrorHandler(ErrorStatus.CONFLICT, ErrorMessages.EMAIL_IS_ALREADY_EXIST);
+            if (emailSaved) {
+                throw new ErrorHandler(WRONG_AUTH, CONFLICT);
             }
 
             next();
@@ -37,12 +30,12 @@ module.exports = {
         }
     },
 
-    validateUser: (req, res, next) => {
+    checkDataForCreateUser: (req, res, next) => {
         try {
             const {error} = createUserValidator.validate(req.body);
 
             if (error) {
-                throw new ErrorHandler(ErrorStatus.CONFLICT, ErrorMessages.ENTITY_NOT_FOUND);
+                throw new ErrorHandler(BAD_REQUEST, error.details[0].message);
             }
 
             next();
@@ -51,17 +44,36 @@ module.exports = {
         }
     },
 
-    validateUserToUpdate: (req, res, next) => {
+    checkDataForUpdateUser: (req, res, next) => {
         try {
             const {error} = updateUserValidator.validate(req.body);
 
             if (error) {
-                throw new ErrorHandler(ErrorStatus.CONFLICT, ErrorMessages.ENTITY_NOT_FOUND);
+                throw new ErrorHandler(BAD_REQUEST, error.details[0].message);
             }
 
             next();
         } catch (e) {
+            next(e);
+        }
+    },
+
+    getUserByDynamicParam: (paramName, searchIn = 'body', dbFiled = paramName) => async (req, res, next) => {
+        try {
+            const value = req[searchIn][paramName];
+
+            const foundUser = await User.findOne({[dbFiled]: value});
+
+            if (!foundUser) {
+                throw new ErrorHandler(BAD_REQUEST, BAD_DATA);
+            }
+
+            req.foundUser = foundUser;
+
             next();
+        } catch (e) {
+            next(e);
         }
     }
+
 };

@@ -1,15 +1,20 @@
-const User = require('../dataBase/User');
-const {hash} = require('../services/password.service');
-const {userNormalizator} = require('../util/user.util');
-const {CREATED, NO_CONTENT} = require('../errors/Error.status');
+const {User} = require('../dataBase');
+
+const {
+    ErrorStatus: {CREATED, ACCEPTED, NO_CONTENT},
+    ErrorMessages: {USER_DELETED}
+} = require('../errors');
+
+const {userNormalizer} = require('../utils');
+
+const {passwordService: {hash}} = require('../services');
 
 module.exports = {
-    getUsers: async (req, res, next) => {
+    getAllUsers: async (req, res, next) => {
         try {
-            const users = await User.find().lean();
-            const usersNormalize = users.map((user) => userNormalizator(user));
+            const users = await User.find();
 
-            res.json(usersNormalize);
+            res.json(users);
         } catch (e) {
             next(e);
         }
@@ -17,10 +22,10 @@ module.exports = {
 
     getUserById: (req, res, next) => {
         try {
-            let user = req.user;
-            user = userNormalizator(user);
+            const user = req.foundUser;
+            const normalizedUser = userNormalizer(user);
 
-            res.json({user});
+            res.json(normalizedUser);
         } catch (e) {
             next(e);
         }
@@ -28,12 +33,19 @@ module.exports = {
 
     createUser: async (req, res, next) => {
         try {
-            const hashPassword = await hash(req.body.password);
+            const {password} = req.body;
 
-            const newUser = await User.create({...req.body, password: hashPassword});
+            const newPassword = await hash(password);
 
-            const user = userNormalizator(newUser);
-            res.status(CREATED).json(user);
+            const newUser = await User.create({
+                ...req.body,
+                password: newPassword
+            });
+
+            const normalizedUser = userNormalizer(newUser);
+
+            res.status(CREATED)
+                .json(normalizedUser);
         } catch (e) {
             next(e);
         }
@@ -43,9 +55,9 @@ module.exports = {
         try {
             const {user_id} = req.params;
             let user = await User.findByIdAndUpdate(user_id, req.body).lean();
-            user = userNormalizator(user);
+            user = userNormalizer(user);
 
-            res.status(CREATED).json(user);
+            res.status(ACCEPTED).json(user);
         } catch (e) {
             next(e);
         }
@@ -53,14 +65,14 @@ module.exports = {
 
     deleteUser: async (req, res, next) => {
         try {
-            const {user_id} = req.params;
-            let deleteUser = await User.findByIdAndDelete(user_id).lean();
-            deleteUser = userNormalizator(deleteUser);
+            const {id} = req.params;
 
-            res.status(NO_CONTENT).json(deleteUser);
-        } catch (e) {
-            next(e);
+            await User.deleteOne({id});
+
+            res.status(NO_CONTENT)
+                .json(USER_DELETED);
+        } catch (error) {
+            next(error);
         }
     }
-
 };
