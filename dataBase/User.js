@@ -1,6 +1,6 @@
 const {Schema, model} = require('mongoose');
 
-const userRoleEnum = require('../config/user.role.enum');
+const {userRolesEnum} = require('../config/index');
 
 const userSchema = new Schema({
     name: {
@@ -10,19 +10,19 @@ const userSchema = new Schema({
     },
     email: {
         type: String,
-        unique: true,
         required: true,
-        trim: true
+        trim: true,
+        unique: true
     },
     password: {
         type: String,
         required: true,
-        trim: true
+        trim: true,
     },
     role: {
         type: String,
-        default: userRoleEnum.USER,
-        enum: Object.values(userRoleEnum)
+        default: userRolesEnum.USER,
+        enum: Object.values(userRolesEnum)
     }
 }, {timestamps: true});
 

@@ -1,78 +1,72 @@
 const {User} = require('../dataBase');
-
-const {
-    ErrorStatus: {CREATED, ACCEPTED, NO_CONTENT},
-    ErrorMessages: {USER_DELETED}
-} = require('../errors');
-
-const {userNormalizer} = require('../utils');
-
-const {passwordService: {hash}} = require('../services');
+const {userService, passwordService} = require('../services');
+const {statusCodes, statusMessages} = require('../config');
+const {userUtil: {userNormalizer}} = require('../utils');
 
 module.exports = {
-    getAllUsers: async (req, res, next) => {
-        try {
-            const users = await User.find();
-
-            res.json(users);
-        } catch (e) {
-            next(e);
-        }
-    },
-
-    getUserById: (req, res, next) => {
-        try {
-            const user = req.foundUser;
-            const normalizedUser = userNormalizer(user);
-
-            res.json(normalizedUser);
-        } catch (e) {
-            next(e);
-        }
-    },
-
-    createUser: async (req, res, next) => {
+    create: async (req, res, next) => {
         try {
             const {password} = req.body;
 
-            const newPassword = await hash(password);
+            const hashedPassword = await passwordService.hash(password);
+            const createdUser = await userService.createItem(User, {...req.body, password: hashedPassword});
 
-            const newUser = await User.create({
-                ...req.body,
-                password: newPassword
-            });
+            const userToReturn = userNormalizer(createdUser);
 
-            const normalizedUser = userNormalizer(newUser);
-
-            res.status(CREATED)
-                .json(normalizedUser);
+            res.status(statusCodes.created).json(userToReturn);
         } catch (e) {
             next(e);
         }
     },
 
-    updateUser: async (req, res, next) => {
+    getAllOrByQuery: async (req, res, next) => {
+        try {
+            const {query} = req;
+
+            const users = await userService.findItemsByQuery(User, query);
+
+            const usersToReturn = users.map((item) => userNormalizer(item));
+
+            res.json(usersToReturn);
+        } catch (e) {
+            next(e);
+        }
+    },
+
+    getOneById: (req, res, next) => {
+        try {
+            const {user} = req;
+
+            const userToReturn = userNormalizer(user);
+
+            res.json(userToReturn);
+        } catch (e) {
+            next(e);
+        }
+    },
+
+    deleteById: async (req, res, next) => {
         try {
             const {user_id} = req.params;
-            let user = await User.findByIdAndUpdate(user_id, req.body).lean();
-            user = userNormalizer(user);
 
-            res.status(ACCEPTED).json(user);
+            await userService.deleteItemById(User, user_id);
+
+            res.status(statusCodes.deleted).json(statusMessages.deleted);
         } catch (e) {
             next(e);
         }
     },
 
-    deleteUser: async (req, res, next) => {
+    updateById: async (req, res, next) => {
         try {
-            const {id} = req.params;
+            const {user_id} = req.params;
+            const newUserData = req.body;
 
-            await User.deleteOne({id});
+            await userService.updateItemById(User, user_id, newUserData);
 
-            res.status(NO_CONTENT)
-                .json(USER_DELETED);
-        } catch (error) {
-            next(error);
+            res.status(statusCodes.updated).json(statusMessages.updated);
+        } catch (e) {
+            next(e);
         }
     }
 };

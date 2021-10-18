@@ -1,27 +1,17 @@
 const {User} = require('../dataBase');
-
-const {
-    ErrorHandler,
-    ErrorMessages: {BAD_DATA, WRONG_AUTH},
-    ErrorStatus: {BAD_REQUEST, CONFLICT}
-} = require('../errors');
-
-const {
-    userValidator: {
-        createUserValidator,
-        updateUserValidator
-    }
-} = require('../validators');
+const {userService} = require('../services');
+const {statusCodes, statusMessages} = require('../config');
+const {ErrorHandler} = require('../errors');
 
 module.exports = {
-
-    emailValidation: async (req, res, next) => {
+    checkUniqueEmail: async (req, res, next) => {
         try {
             const {email} = req.body;
-            const emailSaved = await User.findOne({email});
 
-            if (emailSaved) {
-                throw new ErrorHandler(WRONG_AUTH, CONFLICT);
+            const userByEmail = await userService.findItem(User, {email});
+
+            if (userByEmail) {
+                throw new ErrorHandler(statusCodes.itemAlreadyExists, statusMessages.emailExists);
             }
 
             next();
@@ -30,26 +20,12 @@ module.exports = {
         }
     },
 
-    checkDataForCreateUser: (req, res, next) => {
+    validateUserDataByDynamicParam: (validator, searchIn = 'body') => (req, res, next) => {
         try {
-            const {error} = createUserValidator.validate(req.body);
+            const {error} = validator.validate(req[searchIn]);
 
             if (error) {
-                throw new ErrorHandler(BAD_REQUEST, error.details[0].message);
-            }
-
-            next();
-        } catch (e) {
-            next(e);
-        }
-    },
-
-    checkDataForUpdateUser: (req, res, next) => {
-        try {
-            const {error} = updateUserValidator.validate(req.body);
-
-            if (error) {
-                throw new ErrorHandler(BAD_REQUEST, error.details[0].message);
+                throw new ErrorHandler(statusCodes.notValidData, error.details[0].message);
             }
 
             next();
@@ -62,18 +38,17 @@ module.exports = {
         try {
             const value = req[searchIn][paramName];
 
-            const foundUser = await User.findOne({[dbFiled]: value});
+            const user = await userService.findItem(User, {[dbFiled]: value});
 
-            if (!foundUser) {
-                throw new ErrorHandler(BAD_REQUEST, BAD_DATA);
+            if (!user) {
+                throw new ErrorHandler(statusCodes.notFound, statusMessages.notFound);
             }
 
-            req.foundUser = foundUser;
+            req.user = user;
 
             next();
         } catch (e) {
             next(e);
         }
     }
-
 };

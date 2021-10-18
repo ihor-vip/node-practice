@@ -1,42 +1,47 @@
-const router = require('express')
-    .Router();
+const router = require('express').Router();
 
+const {userValidator} = require('../validators');
 const {userController} = require('../controllers');
-
 const {
     userMiddleware: {
-        checkDataForCreateUser,
-        checkDataForUpdateUser,
-        getUserByDynamicParam,
-        emailValidation,
+        checkUniqueEmail,
+        validateUserDataByDynamicParam,
+        getUserByDynamicParam
     }
 } = require('../middlewares');
+const {middlewareVars} = require('../config');
 
-const {
-    VAR_ID,
-    VAR_ID_DB_FIELD,
-    VAR_PARAMS
-} = require('../config/config');
+router.post(
+    '/',
+    validateUserDataByDynamicParam(userValidator.createUserValidator),
+    checkUniqueEmail,
+    userController.create
+);
+router.get(
+    '/',
+    validateUserDataByDynamicParam(userValidator.getUsersValidator, middlewareVars.query),
+    userController.getAllOrByQuery
+);
 
-router.get('/',
-    userController.getAllUsers);
-
-router.post('/',
-    checkDataForCreateUser,
-    emailValidation,
-    userController.createUser);
-
-router.get('/:id',
-    getUserByDynamicParam(VAR_ID, VAR_PARAMS, VAR_ID_DB_FIELD),
-    userController.getUserById);
-
-router.put('/:id',
-    checkDataForUpdateUser,
-    getUserByDynamicParam(VAR_ID, VAR_PARAMS, VAR_ID_DB_FIELD),
-    userController.updateUser);
-
-router.delete('/:id',
-    getUserByDynamicParam(VAR_ID, VAR_PARAMS, VAR_ID_DB_FIELD),
-    userController.deleteUser);
+router.get(
+    '/:user_id',
+    validateUserDataByDynamicParam(userValidator.userIdValidator, middlewareVars.params),
+    getUserByDynamicParam(middlewareVars.user_id, middlewareVars.params, middlewareVars.id),
+    userController.getOneById
+);
+router.patch(
+    '/:user_id',
+    validateUserDataByDynamicParam(userValidator.userIdValidator, middlewareVars.params),
+    validateUserDataByDynamicParam(userValidator.updateUserValidator),
+    getUserByDynamicParam(middlewareVars.user_id, middlewareVars.params, middlewareVars.id),
+    checkUniqueEmail,
+    userController.updateById
+);
+router.delete(
+    '/:user_id',
+    validateUserDataByDynamicParam(userValidator.userIdValidator, middlewareVars.params),
+    getUserByDynamicParam(middlewareVars.user_id, middlewareVars.params, middlewareVars.id),
+    userController.deleteById
+);
 
 module.exports = router;

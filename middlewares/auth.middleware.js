@@ -1,44 +1,39 @@
 const {User} = require('../dataBase');
+const {userService} = require('../services');
+const {statusCodes, statusMessages} = require('../config');
+const {ErrorHandler} = require('../errors');
+const {authValidator} = require('../validators');
 
-const {
-    ErrorHandler,
-    ErrorStatus: {BAD_REQUEST, NOT_FOUND},
-    ErrorMessages: {BAD_DATA, WRONG_AUTH}
-} = require('../errors');
-
-const {userValidator: {loginValidator}} = require('../validators');
-
-const authenticationMiddleware = {
-    verifyUserLogin: (req, res, next) => {
-        try {
-            const {error} = loginValidator.validate(req.body);
-
-            if (error) {
-                throw new ErrorHandler(BAD_REQUEST, BAD_DATA);
-            }
-
-            next();
-        } catch (e) {
-            next(e);
-        }
-    },
-
-    emailValidation: async (req, res, next) => {
+module.exports = {
+    isUserEmailPresent: async (req, res, next) => {
         try {
             const {email} = req.body;
-            const savedData = await User.findOne({email})
-                .select('+password');
 
-            if (!savedData) {
-                throw new ErrorHandler(NOT_FOUND, WRONG_AUTH);
+            const userByEmail = await userService.findItem(User, {email});
+
+            if (!userByEmail) {
+                throw new ErrorHandler(statusCodes.notValidData, statusMessages.notLogined);
             }
 
-            req.user = savedData;
+            req.body.user = userByEmail;
+
             next();
         } catch (e) {
             next(e);
         }
     },
-};
 
-module.exports = authenticationMiddleware;
+    validateLoginationData: (req, res, next) => {
+        try {
+            const {error} = authValidator.authValidator.validate(req.body);
+
+            if (error) {
+                throw new ErrorHandler(statusCodes.notValidData, statusMessages.notLogined);
+            }
+
+            next();
+        } catch (e) {
+            next(e);
+        }
+    }
+};

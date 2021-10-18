@@ -1,21 +1,27 @@
-const {passwordService: {compare}} = require('../services');
+const {passwordService} = require('../services');
+const {mainVariables: {FORM_MASSAGE}} = require('../config');
+const {userUtil: {userNormalizer}} = require('../utils');
 
-const authenticationController = {
-    userLogin: async (req, res, next) => {
+module.exports = {
+    renderLoginForm: (req, res, next) => {
         try {
-            const {
-                body: {password},
-                user
-            } = req;
-            const user_id = JSON.parse(JSON.stringify(user._id));
+            res.json(FORM_MASSAGE);
+        } catch (e) {
+            next(e);
+        }
+    },
 
-            await compare(password, user.password);
+    loginUser: async (req, res, next) => {
+        try {
+            const {user, password} = req.body;
 
-            res.redirect(`users/${user_id}`);
+            await passwordService.compare(user.password, password);
+
+            const userForResponce = userNormalizer(user);
+
+            res.json(userForResponce);
         } catch (e) {
             next(e);
         }
     }
 };
-
-module.exports = authenticationController;

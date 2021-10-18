@@ -1,14 +1,15 @@
 const bcrypt = require('bcrypt');
-const {ErrorHandler, ErrorStatus, ErrorMessages} = require('../errors');
+
+const {ErrorHandler} = require('../errors');
+const {statusCodes, statusMessages} = require('../config');
 
 module.exports = {
     hash: (password) => bcrypt.hash(password, 10),
-
-    compare: async (password, hashPassword) => {
-        const isPasswordMatched = await bcrypt.compare(password, hashPassword);
+    compare: async (hash, password) => {
+        const isPasswordMatched = await bcrypt.compare(password, hash);
 
         if (!isPasswordMatched) {
-            throw new ErrorHandler(ErrorStatus.UNAUTHORIZED, ErrorMessages.WRONG_AUTH);
+            throw new ErrorHandler(statusCodes.notValidData, statusMessages.notLogined);
         }
     }
 };

@@ -3,30 +3,30 @@ const mongoose = require('mongoose');
 
 require('dotenv').config();
 
-const {config} = require('./config');
-const {authRouter, userRouter} = require('./routes');
+const {mainVariables: {PORT, MONGO_CONNECT}} = require('./config');
 
 const app = express();
 
-mongoose.connect(config.MONGO_CONNECT);
+mongoose.connect(MONGO_CONNECT);
 
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
+
+const {authRouter, userRouter} = require('./routes');
 
 app.use('/auth', authRouter);
 app.use('/users', userRouter);
 // eslint-disable-next-line no-unused-vars
 app.use('*', (err, req, res, next) => {
     res
-        .status(err.status || config.PORT)
+        .status(err.status || PORT)
         .json({
             message: err.message
         });
 });
 
-app.listen(config.PORT, (err) => {
+app.listen(PORT, (err) => {
     if (!err) {
-        console.log(`App Listen ${config.PORT}`);
+        console.log('App listen on ', PORT);
     }
 });
-
