@@ -11,7 +11,7 @@ const { ErrorHandler } = require('../errors');
 const verifyPromise = util.promisify(jwt.verify);
 
 module.exports = {
-    generateTokenPair: () => {
+    generateToken: () => {
         const access_token = jwt.sign({}, TOKEN_ACCESS_SECRET_KEY, { expiresIn: '15m' });
         const refresh_token = jwt.sign({}, TOKEN_REFRESH_SECRET_KEY, { expiresIn: '31d' });
 
