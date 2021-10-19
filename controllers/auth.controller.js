@@ -37,7 +37,7 @@ module.exports = {
         }
     },
 
-    logout: async (req, res) => {
+    logout: async (req, res, next) => {
         try {
             const {user} = req;
 
@@ -45,11 +45,11 @@ module.exports = {
 
             res.end();
         } catch (e) {
-            res.json(e.message);
+            next(e);
         }
     },
 
-    refresh: async (req, res) => {
+    refresh: async (req, res, next) => {
         try {
             const {user} = req;
 
@@ -61,7 +61,7 @@ module.exports = {
 
             res.json({user: newUser, ...tokenRefreshPair}).status(statusCodes.created);
         } catch (e) {
-            res.json(e.message);
+            next(e);
         }
     }
 };

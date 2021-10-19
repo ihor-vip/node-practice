@@ -1,9 +1,9 @@
 const {User, O_Auth} = require('../dataBase');
-const { userService, jwtService} = require('../services');
+const {userService, jwtService} = require('../services');
 const {statusCodes, statusMessages} = require('../config');
 const {ErrorHandler} = require('../errors');
 const {authValidator} = require('../validators');
-const {AUTHORIZATION}=require('../config/variables');
+const {AUTHORIZATION} = require('../config/variables');
 
 module.exports = {
     isUserEmailPresent: async (req, res, next) => {
@@ -46,7 +46,7 @@ module.exports = {
                 throw new ErrorHandler(statusCodes.forbidden, statusMessages.accessDenied);
             }
 
-            jwtService.verifyToken(token);
+            await jwtService.verifyToken(token);
 
             const tokenResponse = await O_Auth.findOne({access_token: token}).populate('user_id');
 
@@ -70,7 +70,7 @@ module.exports = {
                 throw new ErrorHandler(statusCodes.invalidToken, statusMessages.invalidToken);
             }
 
-            jwtService.verifyToken(token, 'refresh');
+            await jwtService.verifyToken(token, 'refresh');
 
             const tokenResponse = await O_Auth.findOne({refresh_token: token}).populate('user_id');
 
