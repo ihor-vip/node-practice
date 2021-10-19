@@ -1,4 +1,4 @@
-const {passwordService, jwtService: {generateToken}} = require('../services');
+const {passwordService, userService, jwtService: {generateToken}} = require('../services');
 const {mainVariables: {FORM_MASSAGE}} = require('../config');
 const {userUtil: {userNormalizer}} = require('../utils');
 const {OAuth} = require('../dataBase');
@@ -15,13 +15,18 @@ module.exports = {
 
     loginUser: async (req, res, next) => {
         try {
-            const {user, password} = req.body;
+            const { item: user, password } = req.body;
 
             await passwordService.compare(user.password, password);
 
-            const userForResponce = userNormalizer(user);
+            const tokenPair = generateToken();
 
-            res.json(userForResponce);
+            await userService.createItem(OAuth, { ...tokenPair, user: user._id });
+
+            res.json({
+                ...tokenPair,
+                user: userNormalizer(user)
+            });
         } catch (e) {
             next(e);
         }
