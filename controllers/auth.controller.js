@@ -41,7 +41,7 @@ module.exports = {
         try {
             const {user} = req;
 
-            await OAuth.deleteOne({user_id: user._id});
+            await O_Auth.deleteOne({user_id: user._id});
 
             res.end();
         } catch (e) {
@@ -57,7 +57,7 @@ module.exports = {
 
             const newUser = userNormalizer(user);
 
-            await OAuth.findByIdAndUpdate({user_id: newUser._id}, {...tokenRefreshPair});
+            await O_Auth.findByIdAndUpdate({user_id: newUser._id}, {...tokenRefreshPair});
 
             res.json({user: newUser, ...tokenRefreshPair}).status(statusCodes.created);
         } catch (e) {
