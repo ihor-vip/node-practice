@@ -6,6 +6,6 @@ module.exports = {
     AUTHORIZATION: 'Authorization',
     TOKEN_TYPE_ACCESS: 'access',
     TOKEN_TYPE_REFRESH: 'refresh',
-    TOKEN_ACCESS_SECRET_KEY: process.env.ACCESS_SECRET_KEY || 'xxx',
-    TOKEN_REFRESH_SECRET_KEY: process.env.REFRESH_SECRET_KEY || 'zzz'
+    TOKEN_ACCESS_SECRET_KEY: process.env.ACCESS_SECRET_KEY || 'secret word',
+    TOKEN_REFRESH_SECRET_KEY: process.env.REFRESH_SECRET_KEY || 'secret refresh word'
 };

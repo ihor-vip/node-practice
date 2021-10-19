@@ -1,5 +1,5 @@
 const {User, OAuth} = require('../dataBase');
-const {userService, jwtService} = require('../services');
+const { userService, jwtService} = require('../services');
 const {statusCodes, statusMessages} = require('../config');
 const {ErrorHandler} = require('../errors');
 const {authValidator} = require('../validators');
@@ -86,5 +86,22 @@ module.exports = {
         } catch (e) {
             next(e);
         }
-    }
+    },
+
+    // isPasswordsMatched: async (req, res, next) => {
+    //     try {
+    //         const { password } = req.body;
+    //         const { password: hashPassword } = req.user;
+    //
+    //         console.log('___________________________');
+    //         console.log(password);
+    //         console.log('___________________________');
+    //
+    //         await passwordService.compare(password, hashPassword);
+    //
+    //         next();
+    //     } catch (e) {
+    //         next(e);
+    //     }
+    // }
 };
