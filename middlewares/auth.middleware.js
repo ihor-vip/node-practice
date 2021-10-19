@@ -1,9 +1,8 @@
-const {User} = require('../dataBase');
+const {User, OAuth} = require('../dataBase');
 const {userService, jwtService} = require('../services');
 const {statusCodes, statusMessages} = require('../config');
 const {ErrorHandler} = require('../errors');
 const {authValidator} = require('../validators');
-const {OAuth} = require('../dataBase');
 const {AUTHORIZATION}=require('../config/variables');
 
 module.exports = {
