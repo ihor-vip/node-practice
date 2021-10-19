@@ -1,9 +1,13 @@
 const {User, O_Auth} = require('../dataBase');
 const {userService, jwtService} = require('../services');
-const {statusCodes, statusMessages} = require('../config');
 const {ErrorHandler} = require('../errors');
 const {authValidator} = require('../validators');
-const {AUTHORIZATION} = require('../config/variables');
+const {
+    mainVariables: {AUTHORIZATION, TOKEN_TYPE_REFRESH},
+    statusCodes,
+    statusMessages
+} = require('../config');
+const userUtil = require('../utils/user.util');
 
 module.exports = {
     isUserEmailPresent: async (req, res, next) => {
@@ -43,7 +47,7 @@ module.exports = {
             const token = req.get(AUTHORIZATION);
 
             if (!token) {
-                throw new ErrorHandler(statusCodes.forbidden, statusMessages.accessDenied);
+                throw new ErrorHandler(statusCodes.invalidToken, statusMessages.noToken);
             }
 
             await jwtService.verifyToken(token);
@@ -54,7 +58,8 @@ module.exports = {
                 throw new ErrorHandler(statusCodes.invalidToken, statusMessages.invalidToken);
             }
 
-            req.user = tokenResponse.user_id;
+            req.token = token;
+            req.user = userUtil.userNormalizer(tokenResponse.user_id.toObject());
 
             next();
         } catch (e) {
@@ -67,20 +72,18 @@ module.exports = {
             const token = req.get(AUTHORIZATION);
 
             if (!token) {
-                throw new ErrorHandler(statusCodes.invalidToken, statusMessages.invalidToken);
+                throw new ErrorHandler(statusCodes.invalidToken, statusMessages.noToken);
             }
 
-            await jwtService.verifyToken(token, 'refresh');
+            await jwtService.verifyToken(token, TOKEN_TYPE_REFRESH);
 
             const tokenResponse = await O_Auth.findOne({refresh_token: token}).populate('user_id');
 
             if (!tokenResponse) {
-                throw new ErrorHandler(statusCodes.invalidToken, statusMessages.invalidToken);
+                throw new ErrorHandler(statusCodes.invalidToken, statusMessages.noToken);
             }
 
-            await O_Auth.deleteOne({refresh_token: token});
-
-            req.user = tokenResponse.user_id;
+            req.user = tokenResponse;
 
             next();
         } catch (e) {

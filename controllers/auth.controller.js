@@ -2,7 +2,6 @@ const {passwordService, jwtService: {generateToken}} = require('../services');
 const {mainVariables: {FORM_MASSAGE}} = require('../config');
 const {userUtil: {userNormalizer}} = require('../utils');
 const O_Auth = require('../dataBase/O_Auth');
-const {statusCodes} = require('../config');
 
 module.exports = {
     renderLoginForm: (req, res, next) => {
@@ -37,29 +36,32 @@ module.exports = {
         }
     },
 
-    logout: async (req, res, next) => {
+    refresh: async (req, res, next) => {
         try {
-            const {user} = req;
+            const {refresh_token, user_id} = req.user;
 
-            await O_Auth.deleteOne({user_id: user._id});
+            await O_Auth.deleteOne({refresh_token});
 
-            res.end();
+            const tokenPair = generateToken();
+
+            await O_Auth.create({
+                ...tokenPair,
+                user_id
+            });
+
+            res.json(tokenPair);
         } catch (e) {
             next(e);
         }
     },
 
-    refresh: async (req, res, next) => {
+    logout: async (req, res, next) => {
         try {
-            const {user} = req;
+            const token = req.token;
 
-            const tokenRefreshPair = generateToken();
+            await O_Auth.findOneAndDelete({access_token: token});
 
-            const newUser = userNormalizer(user);
-
-            await O_Auth.findByIdAndUpdate({user_id: newUser._id}, {...tokenRefreshPair});
-
-            res.json({user: newUser, ...tokenRefreshPair}).status(statusCodes.created);
+            res.json('log in');
         } catch (e) {
             next(e);
         }
