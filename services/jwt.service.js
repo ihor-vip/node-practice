@@ -2,18 +2,18 @@ const jwt = require('jsonwebtoken');
 const util = require('util');
 
 const {
-    mainVariables: {TOKEN_ACCESS_SECRET_KEY, TOKEN_REFRESH_SECRET_KEY, TOKEN_TYPE_ACCESS},
+    mainVariables: { TOKEN_ACCESS_SECRET_KEY, TOKEN_REFRESH_SECRET_KEY, TOKEN_TYPE_ACCESS },
     statusCodes,
     statusMessages
 } = require('../config');
-const {ErrorHandler} = require('../errors');
+const { ErrorHandler } = require('../errors');
 
 const verifyPromise = util.promisify(jwt.verify);
 
 module.exports = {
     generateTokenPair: () => {
-        const access_token = jwt.sign({}, TOKEN_ACCESS_SECRET_KEY, {expiresIn: '15m'});
-        const refresh_token = jwt.sign({}, TOKEN_REFRESH_SECRET_KEY, {expiresIn: '31d'});
+        const access_token = jwt.sign({}, TOKEN_ACCESS_SECRET_KEY, { expiresIn: '15m' });
+        const refresh_token = jwt.sign({}, TOKEN_REFRESH_SECRET_KEY, { expiresIn: '31d' });
 
         return {
             access_token,

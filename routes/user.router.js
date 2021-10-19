@@ -1,58 +1,49 @@
 const router = require('express').Router();
 
-const {middlewareVars} = require('../config');
-const {userController} = require('../controllers');
-const {User} = require('../dataBase');
-const {
-    authMiddleware,
-    generalMiddleware: {
-        validateDataByDynamicParam,
-        getItemByDynamicParam,
-        throwIfItemExist
-    },
-    userMiddleware
-} = require('../middlewares');
 const {userValidator} = require('../validators');
+const {userController} = require('../controllers');
+const {
+    userMiddleware: {
+        checkUniqueEmail,
+        validateUserDataByDynamicParam,
+        getUserByDynamicParam
+    }
+} = require('../middlewares');
+const {middlewareVars} = require('../config');
+const {authMiddleware} = require('../middlewares');
 
 router.post(
     '/',
-    validateDataByDynamicParam(userValidator.createUserValidator),
-    getItemByDynamicParam(User, middlewareVars.email),
-    throwIfItemExist(),
+    validateUserDataByDynamicParam(userValidator.createUserValidator),
+    checkUniqueEmail,
     userController.create
 );
 router.get(
     '/',
-    validateDataByDynamicParam(userValidator.getUsersValidator, middlewareVars.query),
+    validateUserDataByDynamicParam(userValidator.getUsersValidator, middlewareVars.query),
     userController.getAllOrByQuery
 );
 
 router.get(
     '/:user_id',
-    validateDataByDynamicParam(userValidator.userIdValidator, middlewareVars.params),
-    getItemByDynamicParam(User, middlewareVars.user_id, middlewareVars.params, middlewareVars.id),
-    throwIfItemExist(false),
+    validateUserDataByDynamicParam(userValidator.userIdValidator, middlewareVars.params),
+    getUserByDynamicParam(middlewareVars.user_id, middlewareVars.params, middlewareVars.id),
     userController.getOneById
 );
 router.patch(
     '/:user_id',
-    validateDataByDynamicParam(userValidator.userIdValidator, middlewareVars.params),
-    validateDataByDynamicParam(userValidator.updateUserValidator),
-    authMiddleware.validateAccessToken,
-    getItemByDynamicParam(User, middlewareVars.user_id, middlewareVars.params, middlewareVars.id),
-    throwIfItemExist(false),
-    userMiddleware.checkUserPermission([]),
-    getItemByDynamicParam(User, middlewareVars.email),
-    throwIfItemExist(),
+    validateUserDataByDynamicParam(userValidator.userIdValidator, middlewareVars.params),
+    validateUserDataByDynamicParam(userValidator.updateUserValidator),
+    getUserByDynamicParam(middlewareVars.user_id, middlewareVars.params, middlewareVars.id),
+    authMiddleware.checkAccessToken,
+    checkUniqueEmail,
     userController.updateById
 );
 router.delete(
     '/:user_id',
-    validateDataByDynamicParam(userValidator.userIdValidator, middlewareVars.params),
-    authMiddleware.validateAccessToken,
-    getItemByDynamicParam(User, middlewareVars.user_id, middlewareVars.params, middlewareVars.id),
-    throwIfItemExist(false),
-    userMiddleware.checkUserPermission(['admin']),
+    validateUserDataByDynamicParam(userValidator.userIdValidator, middlewareVars.params),
+    getUserByDynamicParam(middlewareVars.user_id, middlewareVars.params, middlewareVars.id),
+    authMiddleware.checkAccessToken,
     userController.deleteById
 );
 

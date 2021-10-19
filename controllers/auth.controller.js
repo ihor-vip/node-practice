@@ -1,7 +1,8 @@
-const {mainVariables: {FORM_MASSAGE, AUTHORIZATION}, statusCodes} = require('../config');
-const {TokenAuth} = require('../dataBase');
-const {passwordService, dbService, jwtService} = require('../services');
+const {passwordService, jwtService: {generateToken}} = require('../services');
+const {mainVariables: {FORM_MASSAGE}} = require('../config');
 const {userUtil: {userNormalizer}} = require('../utils');
+const {OAuth} = require('../dataBase');
+const {statusCodes} = require('../config');
 
 module.exports = {
     renderLoginForm: (req, res, next) => {
@@ -14,51 +15,44 @@ module.exports = {
 
     loginUser: async (req, res, next) => {
         try {
-            const {item: user, password} = req.body;
+            const {user, password} = req.body;
 
             await passwordService.compare(user.password, password);
 
-            const tokenPair = jwtService.generateTokenPair();
+            const userForResponce = userNormalizer(user);
 
-            await dbService.createItem(TokenAuth, {...tokenPair, user: user._id});
-
-            res.json({
-                ...tokenPair,
-                user: userNormalizer(user)
-            });
+            res.json(userForResponce);
         } catch (e) {
             next(e);
         }
     },
 
-    logoutUser: async (req, res, next) => {
+    logout: async (req, res) => {
         try {
-            const access_token = req.get(AUTHORIZATION);
-            await dbService.deleteItem(TokenAuth, {access_token});
+            const {user} = req;
 
-            res.status(statusCodes.deleted);
+            await OAuth.deleteOne({user_id: user._id});
+
+            res.end();
         } catch (e) {
-            next(e);
+            res.json(e.message);
         }
     },
 
-    refresh: async (req, res, next) => {
+    refresh: async (req, res) => {
         try {
-            const refresh_token = req.get(AUTHORIZATION);
-            const user = req.loginUser;
+            const {user} = req;
 
-            await dbService.deleteItem(TokenAuth, {refresh_token});
+            const tokenRefreshPair = generateToken();
 
-            const tokenPair = jwtService.generateTokenPair();
+            const newUser = userNormalizer(user);
 
-            await dbService.createItem(TokenAuth, {...tokenPair, user: user._id});
+            await OAuth.findByIdAndUpdate({user_id:newUser._id},{...tokenRefreshPair});
 
-            res.json({
-                ...tokenPair,
-                user: userNormalizer(user)
-            });
+            res.json({user: newUser, ...tokenRefreshPair}).status(statusCodes.created);
         } catch (e) {
-            next(e);
+            res.json(e.message);
         }
     }
 };
+

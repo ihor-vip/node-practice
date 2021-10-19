@@ -1,21 +1,50 @@
+const {User} = require('../dataBase');
+const {userService} = require('../services');
 const {statusCodes, statusMessages} = require('../config');
 const {ErrorHandler} = require('../errors');
 
 module.exports = {
-    checkUserPermission: (rolesArr = []) => (req, res, next) => {
+    checkUniqueEmail: async (req, res, next) => {
         try {
-            const {role} = req.loginUser;
+            const {email} = req.body;
 
-            const user = req.loginUser;
-            const {user_id} = req.params;
+            const userByEmail = await userService.findItem(User, {email});
 
-            if (!rolesArr.length && user.id === user_id) {
-                return next();
+            if (userByEmail) {
+                throw new ErrorHandler(statusCodes.itemAlreadyExists, statusMessages.emailExists);
             }
 
-            if (!rolesArr.includes(role)) {
-                throw new ErrorHandler(statusCodes.forbidden, statusMessages.forbidden);
+            next();
+        } catch (e) {
+            next(e);
+        }
+    },
+
+    validateUserDataByDynamicParam: (validator, searchIn = 'body') => (req, res, next) => {
+        try {
+            const {error} = validator.validate(req[searchIn]);
+
+            if (error) {
+                throw new ErrorHandler(statusCodes.notValidData, error.details[0].message);
             }
+
+            next();
+        } catch (e) {
+            next(e);
+        }
+    },
+
+    getUserByDynamicParam: (paramName, searchIn = 'body', dbFiled = paramName) => async (req, res, next) => {
+        try {
+            const value = req[searchIn][paramName];
+
+            const user = await userService.findItem(User, {[dbFiled]: value});
+
+            if (!user) {
+                throw new ErrorHandler(statusCodes.notFound, statusMessages.notFound);
+            }
+
+            req.user = user;
 
             next();
         } catch (e) {

@@ -1,4 +1,5 @@
 module.exports = {
-    TokenAuth: require('./TokenAuth'),
-    User: require('./User')
+    User: require('./User'),
+    OAuth: require('./O_Auth')
 };
+

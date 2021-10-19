@@ -1,6 +1,6 @@
-const {statusCodes, statusMessages} = require('../config');
 const {User} = require('../dataBase');
-const {dbService, passwordService} = require('../services');
+const {userService, passwordService} = require('../services');
+const {statusCodes, statusMessages} = require('../config');
 const {userUtil: {userNormalizer}} = require('../utils');
 
 module.exports = {
@@ -9,7 +9,7 @@ module.exports = {
             const {password} = req.body;
 
             const hashedPassword = await passwordService.hash(password);
-            const createdUser = await dbService.createItem(User, {...req.body, password: hashedPassword});
+            const createdUser = await userService.createItem(User, {...req.body, password: hashedPassword});
 
             const userToReturn = userNormalizer(createdUser);
 
@@ -23,7 +23,7 @@ module.exports = {
         try {
             const {query} = req;
 
-            const users = await dbService.findItemsByQuery(User, query);
+            const users = await userService.findItemsByQuery(User, query);
 
             const usersToReturn = users.map((item) => userNormalizer(item));
 
@@ -35,7 +35,7 @@ module.exports = {
 
     getOneById: (req, res, next) => {
         try {
-            const {item: user} = req.body;
+            const {user} = req;
 
             const userToReturn = userNormalizer(user);
 
@@ -49,7 +49,7 @@ module.exports = {
         try {
             const {user_id} = req.params;
 
-            await dbService.deleteItemById(User, user_id);
+            await userService.deleteItemById(User, user_id);
 
             res.status(statusCodes.deleted).json(statusMessages.deleted);
         } catch (e) {
@@ -62,7 +62,7 @@ module.exports = {
             const {user_id} = req.params;
             const newUserData = req.body;
 
-            await dbService.updateItemById(User, user_id, newUserData);
+            await userService.updateItemById(User, user_id, newUserData);
 
             res.status(statusCodes.updated).json(statusMessages.updated);
         } catch (e) {

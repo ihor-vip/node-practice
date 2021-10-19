@@ -1,34 +1,23 @@
-const {
-    databaseTablesEnum,
-    mainVariables: {AUTHORIZATION, TOKEN_TYPE_REFRESH},
-    statusCodes,
-    statusMessages
-} = require('../config');
-const {TokenAuth} = require('../dataBase');
-const {ErrorHandler} = require('../errors');
+const {User} = require('../dataBase');
 const {userService, jwtService} = require('../services');
+const {statusCodes, statusMessages} = require('../config');
+const {ErrorHandler} = require('../errors');
+const {authValidator} = require('../validators');
+const {OAuth} = require('../dataBase');
+const {AUTHORIZATION}=require('../config/variables');
 
 module.exports = {
-    validateAccessToken: async (req, res, next) => {
+    isUserEmailPresent: async (req, res, next) => {
         try {
-            const access_token = req.get(AUTHORIZATION);
-            if (!access_token) {
-                throw new ErrorHandler(statusCodes.invalidToken, statusMessages.noToken);
+            const {email} = req.body;
+
+            const userByEmail = await userService.findItem(User, {email});
+
+            if (!userByEmail) {
+                throw new ErrorHandler(statusCodes.notValidData, statusMessages.notLogined);
             }
 
-            await jwtService.verifyToken(access_token);
-
-            const tokenFromDB = await userService.findItemAndJoin(
-                TokenAuth,
-                {access_token},
-                databaseTablesEnum.USER
-            );
-
-            if (!tokenFromDB) {
-                throw new ErrorHandler(statusCodes.invalidToken, statusMessages.invalidToken);
-            }
-
-            req.loginUser = tokenFromDB.user;
+            req.body.user = userByEmail;
 
             next();
         } catch (e) {
@@ -36,26 +25,63 @@ module.exports = {
         }
     },
 
-    validateRefreshToken: async (req, res, next) => {
+    validateLoginationData: (req, res, next) => {
         try {
-            const refresh_token = req.get(AUTHORIZATION);
-            if (!refresh_token) {
-                throw new ErrorHandler(statusCodes.invalidToken, statusMessages.noToken);
+            const {error} = authValidator.authValidator.validate(req.body);
+
+            if (error) {
+                throw new ErrorHandler(statusCodes.notValidData, statusMessages.notLogined);
             }
 
-            await jwtService.verifyToken(refresh_token, TOKEN_TYPE_REFRESH);
+            next();
+        } catch (e) {
+            next(e);
+        }
+    },
 
-            const tokenFromDB = await userService.findItemAndJoin(
-                TokenAuth,
-                {refresh_token},
-                databaseTablesEnum.USER
-            );
+    checkAccessToken: async (req, res, next) => {
+        try {
+            const token = req.get(AUTHORIZATION);
 
-            if (!tokenFromDB) {
+            if (!token) {
+                throw new ErrorHandler(statusCodes.forbidden, statusMessages.accessDenied);
+            }
+
+            jwtService.verifyToken(token);
+
+            const tokenResponse = await OAuth.findOne({access_token: token}).populate('user_id');
+
+            if (!tokenResponse) {
                 throw new ErrorHandler(statusCodes.invalidToken, statusMessages.invalidToken);
             }
 
-            req.loginUser = tokenFromDB.user;
+            req.user = tokenResponse.user_id;
+
+            next();
+        } catch (e) {
+            next(e);
+        }
+    },
+
+    checkRefreshToken: async (req, res, next) => {
+        try {
+            const token = req.get(AUTHORIZATION);
+
+            if (!token) {
+                throw new ErrorHandler(statusCodes.invalidToken, statusMessages.invalidToken);
+            }
+
+            jwtService.verifyToken(token, 'refresh');
+
+            const tokenResponse = await OAuth.findOne({refresh_token: token}).populate('user_id');
+
+            if (!tokenResponse) {
+                throw new ErrorHandler(statusCodes.invalidToken, statusMessages.invalidToken);
+            }
+
+            await OAuth.deleteOne({refresh_token: token});
+
+            req.user = tokenResponse.user_id;
 
             next();
         } catch (e) {
