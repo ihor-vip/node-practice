@@ -1,7 +1,7 @@
 const {passwordService, jwtService: {generateToken}} = require('../services');
 const {mainVariables: {FORM_MASSAGE}} = require('../config');
 const {userUtil: {userNormalizer}} = require('../utils');
-const {OAuth} = require('../dataBase');
+const O_Auth = require('../dataBase/O_Auth');
 const {statusCodes} = require('../config');
 
 module.exports = {
@@ -22,6 +22,11 @@ module.exports = {
             const tokenPair = generateToken();
 
             const userForResponce = userNormalizer(user);
+
+            await O_Auth.create({
+                ...tokenPair,
+                user_id: userForResponce._id
+            });
 
             res.json({
                 user: userForResponce,

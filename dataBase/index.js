@@ -1,5 +1,5 @@
 module.exports = {
     User: require('./User'),
-    OAuth: require('./O_Auth')
+    O_Auth: require('./O_Auth')
 };
 

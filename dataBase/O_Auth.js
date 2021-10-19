@@ -1,24 +1,22 @@
-const {model, Schema} = require('mongoose');
+const { Schema, model } = require('mongoose');
 
-const oAuth = new Schema({
+const oAuthSchema = new Schema({
     access_token: {
         type: String,
-        trim: true,
-        required: true
+        required: true,
+        trim: true
     },
-
     refresh_token: {
         type: String,
-        trim: true,
-        required: true
+        required: true,
+        trim: true
     },
-
     user_id: {
         type: Schema.Types.ObjectId,
-        trim: true,
         required: true,
         ref: 'user'
-    }
-});
+    },
 
-module.exports = model('o_auth', oAuth);
+}, { timestamps: true });
+
+module.exports = model('o_auth', oAuthSchema);
