@@ -11,7 +11,7 @@ const {
     statusCodes,
     statusMessages
 } = require('../config');
-const {ErrorHandler} = require('../errors');
+const { ErrorHandler } = require('../errors');
 
 const verifyPromise = util.promisify(jwt.verify);
 
