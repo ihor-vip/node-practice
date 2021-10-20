@@ -1,8 +1,8 @@
 const router = require('express').Router();
 
-const {middlewareVars} = require('../config');
-const {userController} = require('../controllers');
-const {User} = require('../dataBase');
+const { middlewareVars } = require('../config');
+const { userController } = require('../controllers');
+const { User } = require('../dataBase');
 const {
     authMiddleware,
     generalMiddleware: {
