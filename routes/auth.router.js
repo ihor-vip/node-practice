@@ -1,6 +1,6 @@
 const router = require('express').Router();
 
-const {middlewareVars} = require('../config');
+const { middlewareVars } = require('../config');
 const {authController} = require('../controllers');
 const {User} = require('../dataBase');
 const {
