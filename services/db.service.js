@@ -7,8 +7,6 @@ module.exports = {
 
     findItemsByQuery: (schema, query) => schema.find(query),
 
-    findItemById: (schema, itemId) => schema.findById(itemId),
-
     findItem: (schema, filter) => schema.findOne(filter),
 
     findItemAndJoin: (schema, filter, tableToJoin) => schema.findOne(filter).populate(tableToJoin),
