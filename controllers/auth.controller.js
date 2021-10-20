@@ -114,6 +114,24 @@ module.exports = {
         }
     },
 
+    passwordForgotChange: async (req, res, next) => {
+        try {
+            const {item: user, email, password} = req.body;
+
+            const hashedPassword = await passwordService.hash(password);
+            await dbService.updateItemById(User, user.id, {password: hashedPassword});
+
+            await emailService.sendMail(
+                EMAIL_FOR_TEST_LETTERS || email,
+                emailActionsEnum.PASSWORD_CHANGE,
+                {userName: user.name}
+            );
+
+            res.status(statusCodes.updated).json(statusMessages.paswordUpdated);
+        } catch (e) {
+            next(e);
+        }
+    },
 
     passwordChange: async (req, res, next) => {
         try {
