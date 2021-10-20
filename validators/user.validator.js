@@ -31,7 +31,6 @@ const updateUserValidator = Joi.object({
     name: Joi.string().alphanum()
         .min(2)
         .max(30),
-    email: Joi.string().regex(EMAIL_REGEXP)
 });
 
 const userIdValidator = Joi.object({

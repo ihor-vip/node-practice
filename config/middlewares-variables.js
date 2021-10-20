@@ -6,4 +6,5 @@ module.exports = {
     id: '_id',
     user_id: 'user_id',
     email: 'email',
+    activatedByEmail: 'activatedByEmail',
 };

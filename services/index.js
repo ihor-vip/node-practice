@@ -1,5 +1,6 @@
 module.exports = {
-    userService: require('./user.service'),
-    passwordService: require('./password.service'),
-    jwtService: require('./jwt.service')
+    dbService: require('./db.service'),
+    emailService: require('./email.service'),
+    jwtService: require('./jwt.service'),
+    passwordService: require('./password.service')
 };
