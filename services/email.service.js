@@ -40,6 +40,4 @@ const sendMail = async (userMail, emailAction, context = {}) => {
     });
 };
 
-module.exports = {
-    sendMail
-};
+module.exports = {sendMail};
