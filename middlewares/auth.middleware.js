@@ -6,7 +6,7 @@ const {
 } = require('../config');
 const {TokenAuth, TokenActive} = require('../dataBase');
 const {ErrorHandler} = require('../errors');
-const {dbService, jwtService} = require('../services');
+const { dbService, jwtService } = require('../services');
 
 module.exports = {
     validateAccessToken: async (req, res, next) => {
