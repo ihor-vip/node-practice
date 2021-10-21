@@ -1,23 +1,7 @@
-const {
-    emailActionsEnum,
-    variables: {
-        AUTHORIZATION,
-        EMAIL_FOR_TEST_LETTERS,
-        FORM_MASSAGE,
-        FRONTEND_SITE
-    },
-    tokenPurposeEnum,
-    statusCodes,
-    statusMessages
-} = require('../config');
-const {TokenAuth, TokenActive, User} = require('../dataBase');
-const {
-    dbService,
-    emailService,
-    passwordService,
-    jwtService
-} = require('../services');
+const {passwordService, jwtService: {generateToken}} = require('../services');
+const {mainVariables: {FORM_MASSAGE}} = require('../config');
 const {userUtil: {userNormalizer}} = require('../utils');
+const O_Auth = require('../dataBase/O_Auth');
 
 module.exports = {
     renderLoginForm: (req, res, next) => {
@@ -30,35 +14,23 @@ module.exports = {
 
     loginUser: async (req, res, next) => {
         try {
-            const {item: user, password} = req.body;
+            const {user, password} = req.body;
 
             await passwordService.compare(user.password, password);
 
-            const tokenPair = jwtService.generateTokenPair();
+            const tokenPair = generateToken();
 
-            await dbService.createItem(TokenAuth, {...tokenPair, user: user._id});
+            const userForResponce = userNormalizer(user);
 
-            await emailService.sendMail(
-                EMAIL_FOR_TEST_LETTERS || user.email,
-                emailActionsEnum.ACCOUNT_AUTH,
-                {userName: user.name}
-            );
+            await O_Auth.create({
+                ...tokenPair,
+                user_id: userForResponce._id
+            });
 
             res.json({
-                ...tokenPair,
-                user: userNormalizer(user)
+                user: userForResponce,
+                ...tokenPair
             });
-        } catch (e) {
-            next(e);
-        }
-    },
-
-    logoutUser: async (req, res, next) => {
-        try {
-            const access_token = req.get(AUTHORIZATION);
-            await dbService.deleteItem(TokenAuth, {access_token});
-
-            res.status(statusCodes.deleted);
         } catch (e) {
             next(e);
         }
@@ -66,89 +38,30 @@ module.exports = {
 
     refresh: async (req, res, next) => {
         try {
-            const refresh_token = req.get(AUTHORIZATION);
-            const user = req.loginUser;
+            const {refresh_token, user_id} = req.user;
 
-            await dbService.deleteItem(TokenAuth, {refresh_token});
+            await O_Auth.deleteOne({refresh_token});
 
-            const tokenPair = jwtService.generateTokenPair();
+            const tokenPair = generateToken();
 
-            await dbService.createItem(TokenAuth, {...tokenPair, user: user._id});
-
-            res.json({
+            await O_Auth.create({
                 ...tokenPair,
-                user: userNormalizer(user)
+                user_id
             });
+
+            res.json(tokenPair);
         } catch (e) {
             next(e);
         }
     },
 
-    passwordForgotSendEmail: async (req, res, next) => {
+    logout: async (req, res, next) => {
         try {
-            const {item: user, email} = req.body;
+            const token = req.token;
 
-            const token = jwtService.generateActiveToken();
+            await O_Auth.findOneAndDelete({access_token: token});
 
-            await dbService.createItem(
-                TokenActive,
-                {...token, token_purpose: tokenPurposeEnum.forgotPass, user: user._id}
-            );
-
-            await emailService.sendMail(
-                EMAIL_FOR_TEST_LETTERS || email,
-                emailActionsEnum.PASSWORD_FORGOT,
-                {
-                    userName: user.name,
-                    activeTokenLink: `${FRONTEND_SITE}?${AUTHORIZATION}=${token.active_token}`
-                }
-            );
-
-            res.json({
-                ...token,
-                token_purpose: tokenPurposeEnum.forgotPass,
-                user: user._id
-            });
-        } catch (e) {
-            next(e);
-        }
-    },
-
-    passwordForgotChange: async (req, res, next) => {
-        try {
-            const {item: user, email, password} = req.body;
-
-            const hashedPassword = await passwordService.hash(password);
-            await dbService.updateItemById(User, user.id, {password: hashedPassword});
-
-            await emailService.sendMail(
-                EMAIL_FOR_TEST_LETTERS || email,
-                emailActionsEnum.PASSWORD_CHANGE,
-                {userName: user.name}
-            );
-
-            res.status(statusCodes.updated).json(statusMessages.paswordUpdated);
-        } catch (e) {
-            next(e);
-        }
-    },
-
-    passwordChange: async (req, res, next) => {
-        try {
-            const {loginUser, body: {old_password, password}} = req;
-
-            await passwordService.compare(loginUser.password, old_password);
-
-            const hashedPassword = await passwordService.hash(password);
-            await dbService.updateItemById(User, loginUser.id, {password: hashedPassword});
-
-            await emailService.sendMail(
-                EMAIL_FOR_TEST_LETTERS || loginUser.email,
-                emailActionsEnum.PASSWORD_CHANGE,
-                {userName: loginUser.name}
-            );
-
-            res.status(statusCodes.updated).json(statusMessages.paswordUpdated);
+            res.json('log in');
         } catch (e) {
             next(e);
         }

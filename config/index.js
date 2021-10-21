@@ -1,12 +1,10 @@
 module.exports = {
-    databaseTablesEnum: require('./database-tables.enum'),
-    emailActionsEnum: require('./email-actions.enum'),
-    middlewareVars: require('./middlewares-variables'),
+    mainVariables: require('./variables'),
     regex: require('./regex'),
-    tokenPurposeEnum: require('./token-purpose.enum'),
+    userRolesEnum: require('./user-roles.enum'),
     statusCodes: require('./status-codes'),
     statusMessages: require('./status-massages'),
-    userRolesEnum: require('./user-roles.enum'),
-    variables: require('./variables')
+    middlewareVars: require('./middlewares-variables')
 };
+
 

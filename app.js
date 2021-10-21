@@ -3,11 +3,11 @@ const mongoose = require('mongoose');
 
 require('dotenv').config();
 
-const {variables: {PORT, DBPath}} = require('./config');
+const {mainVariables: {PORT, MONGO_CONNECT}} = require('./config');
 
 const app = express();
 
-mongoose.connect(DBPath);
+mongoose.connect(MONGO_CONNECT);
 
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));

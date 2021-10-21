@@ -1,34 +1,26 @@
+const {User, O_Auth} = require('../dataBase');
+const {userService, jwtService} = require('../services');
+const {ErrorHandler} = require('../errors');
+const {authValidator} = require('../validators');
 const {
-    databaseTablesEnum,
-    variables: {AUTHORIZATION, TOKEN_TYPE_REFRESH},
+    mainVariables: {AUTHORIZATION, TOKEN_TYPE_REFRESH},
     statusCodes,
     statusMessages
 } = require('../config');
-const {TokenAuth, TokenActive} = require('../dataBase');
-const {ErrorHandler} = require('../errors');
-const {dbService, jwtService} = require('../services');
+const userUtil = require('../utils/user.util');
 
 module.exports = {
-    validateAccessToken: async (req, res, next) => {
+    isUserEmailPresent: async (req, res, next) => {
         try {
-            const access_token = req.get(AUTHORIZATION);
-            if (!access_token) {
-                throw new ErrorHandler(statusCodes.invalidToken, statusMessages.noToken);
+            const {email} = req.body;
+
+            const userByEmail = await userService.findItem(User, {email});
+
+            if (!userByEmail) {
+                throw new ErrorHandler(statusCodes.notValidData, statusMessages.notLogined);
             }
 
-            await jwtService.verifyToken(access_token);
-
-            const tokenFromDB = await dbService.findItemAndJoin(
-                TokenAuth,
-                {access_token},
-                databaseTablesEnum.USER
-            );
-
-            if (!tokenFromDB) {
-                throw new ErrorHandler(statusCodes.invalidToken, statusMessages.invalidToken);
-            }
-
-            req.loginUser = tokenFromDB.user;
+            req.body.user = userByEmail;
 
             next();
         } catch (e) {
@@ -36,26 +28,13 @@ module.exports = {
         }
     },
 
-    validateRefreshToken: async (req, res, next) => {
+    validateLoginationData: (req, res, next) => {
         try {
-            const refresh_token = req.get(AUTHORIZATION);
-            if (!refresh_token) {
-                throw new ErrorHandler(statusCodes.invalidToken, statusMessages.noToken);
+            const {error} = authValidator.authValidator.validate(req.body);
+
+            if (error) {
+                throw new ErrorHandler(statusCodes.notValidData, statusMessages.notLogined);
             }
-
-            await jwtService.verifyToken(refresh_token, TOKEN_TYPE_REFRESH);
-
-            const tokenFromDB = await dbService.findItemAndJoin(
-                TokenAuth,
-                {refresh_token},
-                databaseTablesEnum.USER
-            );
-
-            if (!tokenFromDB) {
-                throw new ErrorHandler(statusCodes.invalidToken, statusMessages.invalidToken);
-            }
-
-            req.loginUser = tokenFromDB.user;
 
             next();
         } catch (e) {
@@ -63,27 +42,49 @@ module.exports = {
         }
     },
 
-    validateActiveToken: async (req, res, next) => {
+    checkAccessToken: async (req, res, next) => {
         try {
-            const active_token = req.get(AUTHORIZATION);
+            const token = req.get(AUTHORIZATION);
 
-            if (!active_token) {
+            if (!token) {
                 throw new ErrorHandler(statusCodes.invalidToken, statusMessages.noToken);
             }
 
-            await jwtService.verifyActiveToken(active_token);
+            await jwtService.verifyToken(token);
 
-            const tokenFromDB = await dbService.findItemAndJoin(
-                TokenActive,
-                {active_token},
-                databaseTablesEnum.USER
-            );
+            const tokenResponse = await O_Auth.findOne({access_token: token}).populate('user_id');
 
-            if (!tokenFromDB) {
+            if (!tokenResponse) {
                 throw new ErrorHandler(statusCodes.invalidToken, statusMessages.invalidToken);
             }
 
-            req.activeUser = tokenFromDB.user;
+            req.token = token;
+            req.user = userUtil.userNormalizer(tokenResponse.user_id.toObject());
+
+            next();
+        } catch (e) {
+            next(e);
+        }
+    },
+
+    checkRefreshToken: async (req, res, next) => {
+        try {
+            const token = req.get(AUTHORIZATION);
+
+            if (!token) {
+                throw new ErrorHandler(statusCodes.invalidToken, statusMessages.noToken);
+            }
+
+            await jwtService.verifyToken(token, TOKEN_TYPE_REFRESH);
+
+            const tokenResponse = await O_Auth.findOne({refresh_token: token}).populate('user_id');
+
+            if (!tokenResponse) {
+                throw new ErrorHandler(statusCodes.invalidToken, statusMessages.noToken);
+            }
+
+            req.user = tokenResponse;
+
             next();
         } catch (e) {
             next(e);
