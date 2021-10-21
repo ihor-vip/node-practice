@@ -51,9 +51,9 @@ module.exports = {
 
     deleteById: async (req, res, next) => {
         try {
-            const {user_id, email} = req.params;
+            const {user_id} = req.params;
 
-            await emailService.sendMail(email, DELETED_USER, { userName: name });
+            await emailService.sendMail(req.body.email, DELETED_USER, { userName: name });
 
             await userService.deleteItemById(User, user_id);
 
@@ -68,11 +68,9 @@ module.exports = {
             const {user_id} = req.params;
             const newUserData = req.body;
 
-            const updatedUser = await userService.updateItemById(User, user_id, newUserData);
+            await userService.updateItemById(User, user_id, newUserData);
 
-            const { email } = updatedUser;
-
-            await emailService.sendMail(email, UPDATED_USER, { userName: name });
+            await emailService.sendMail(req.body.email, UPDATED_USER, { userName: name });
 
             res.status(statusCodes.updated).json(statusMessages.updated);
         } catch (e) {
