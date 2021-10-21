@@ -5,7 +5,7 @@ module.exports = {
     statusCodes: require('./status-codes'),
     statusMessages: require('./status-massages'),
     regex: require('./regex'),
-    userRolesEnum: require('./user-roles.enum')
+    userRolesEnum: require('./user-roles.enum'),
 };
 
 

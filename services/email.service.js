@@ -12,6 +12,14 @@ const templateParser = new EmailTemplates({
     }
 });
 
+const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+        user: mainVariables.NO_REPLY_EMAIL,
+        pass: mainVariables.NO_REPLY_EMAIL_PASSWORD
+    }
+});
+
 const sendMail = async (userMail, emailAction, context = {}) => {
     const templateInfo = allTemplates[emailAction];
 
@@ -20,14 +28,6 @@ const sendMail = async (userMail, emailAction, context = {}) => {
     }
 
     const html = await templateParser.render(templateInfo.templateName, context);
-
-    const transporter = nodemailer.createTransport({
-        service: 'gmail',
-        auth: {
-            user: mainVariables.NO_REPLY_EMAIL,
-            pass: mainVariables.NO_REPLY_EMAIL_PASSWORD
-        }
-    });
 
     return transporter.sendMail({
         from: 'No reply',
