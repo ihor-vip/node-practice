@@ -1,14 +1,18 @@
 const {User} = require('../dataBase');
-const {userService, passwordService} = require('../services');
+const {userService, passwordService, emailService} = require('../services');
 const {statusCodes, statusMessages} = require('../config');
 const {userUtil: {userNormalizer}} = require('../utils');
+const { DELETED_USER, REGISTERED_USER, UPDATED_USER } = require('../config');
 
 module.exports = {
     create: async (req, res, next) => {
         try {
-            const {password} = req.body;
+            const {password, email, name} = req.body;
 
             const hashedPassword = await passwordService.hash(password);
+
+            await emailService.sendMail(email, REGISTERED_USER, { userName: name });
+
             const createdUser = await userService.createItem(User, {...req.body, password: hashedPassword});
 
             const userToReturn = userNormalizer(createdUser);
@@ -47,7 +51,9 @@ module.exports = {
 
     deleteById: async (req, res, next) => {
         try {
-            const {user_id} = req.params;
+            const {user_id, email} = req.params;
+
+            await emailService.sendMail(email, DELETED_USER, { userName: name });
 
             await userService.deleteItemById(User, user_id);
 
@@ -62,7 +68,11 @@ module.exports = {
             const {user_id} = req.params;
             const newUserData = req.body;
 
-            await userService.updateItemById(User, user_id, newUserData);
+            const updatedUser = await userService.updateItemById(User, user_id, newUserData);
+
+            const { email } = updatedUser;
+
+            await emailService.sendMail(email, UPDATED_USER, { userName: name });
 
             res.status(statusCodes.updated).json(statusMessages.updated);
         } catch (e) {

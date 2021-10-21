@@ -1,10 +1,11 @@
 module.exports = {
+    emailActionsEnum: require('./email-actions.enum'),
     mainVariables: require('./variables'),
-    regex: require('./regex'),
-    userRolesEnum: require('./user-roles.enum'),
+    middlewareVars: require('./middlewares-variables'),
     statusCodes: require('./status-codes'),
     statusMessages: require('./status-massages'),
-    middlewareVars: require('./middlewares-variables')
+    regex: require('./regex'),
+    userRolesEnum: require('./user-roles.enum')
 };
 
 

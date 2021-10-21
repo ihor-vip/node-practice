@@ -10,4 +10,5 @@ module.exports = {
     deleted: 'Item is deleted',
     notLogined: 'Email or password is wrong',
     accessDenied: 'Access is denied',
+    wrongTemplate: 'wrong template name'
 };
