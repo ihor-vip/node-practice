@@ -1,11 +1,11 @@
-const { statusCodes, statusMessages } = require('../config');
-const { ErrorHandler } = require('../errors');
-const { dbService } = require('../services');
+const {statusCodes, statusMessages} = require('../config');
+const {ErrorHandler} = require('../errors');
+const {dbService} = require('../services');
 
 module.exports = {
     validateDataByDynamicParam: (validator, searchIn = 'body') => (req, res, next) => {
         try {
-            const { error } = validator.validate(req[searchIn]);
+            const {error} = validator.validate(req[searchIn]);
 
             if (error) {
                 throw new ErrorHandler(statusCodes.notValidData, error.details[0].message);
@@ -21,7 +21,7 @@ module.exports = {
         try {
             const value = req[searchIn][paramName];
 
-            const item = await dbService.findItem(itemModel, { [dbFiled]: value });
+            const item = await dbService.findItem(itemModel, {[dbFiled]: value});
 
             req.body.item = item;
 
@@ -33,7 +33,7 @@ module.exports = {
 
     throwIfItemExist: (throwErr = true) => (req, res, next) => {
         try {
-            const { item } = req.body;
+            const {item} = req.body;
 
             if (item && throwErr) {
                 return next(new ErrorHandler(statusCodes.itemAlreadyExists, statusMessages.itemAlreadyExists));
