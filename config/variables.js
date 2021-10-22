@@ -1,7 +1,7 @@
 module.exports = {
     PORT: process.env.PORT || 5000,
     DBPath: process.env.DBPath || 'mongodb://localhost:27017/june-2021',
-    FRONTEND_SITE: process.env.FRONTEND_SITE || 'https://stackoverflow.com/',
+    FRONTEND_SITE: process.env.FRONTEND_SITE || 'http://somesite.com',
 
     CURRENT_YEAR: new Date().getFullYear(),
     FORM_MASSAGE: 'login form',
