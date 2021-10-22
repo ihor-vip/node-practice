@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 
 require('dotenv').config();
 
-const { mainVariables: { PORT, DBPath }, statusCodes, statusMessages } = require('./config');
+const { variables: { PORT, DBPath }, statusCodes, statusMessages } = require('./config');
 
 const app = express();
 
