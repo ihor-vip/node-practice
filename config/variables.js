@@ -1,18 +1,19 @@
 module.exports = {
     PORT: process.env.PORT || 5000,
-    MONGO_CONNECT: process.env.MONGO_CONNECT || 'mongodb://localhost:27017/june-2021',
+    DBPath: process.env.DBPath || 'mongodb://localhost:27017/june-2021',
     FRONTEND_SITE: process.env.FRONTEND_SITE || 'https://stackoverflow.com/',
 
+    CURRENT_YEAR: new Date().getFullYear(),
     FORM_MASSAGE: 'login form',
 
     AUTHORIZATION: 'Authorization',
     TOKEN_TYPE_ACCESS: 'access',
     TOKEN_TYPE_REFRESH: 'refresh',
-    TOKEN_ACCESS_SECRET_KEY: process.env.ACCESS_SECRET_KEY || 'access secret key',
-    TOKEN_REFRESH_SECRET_KEY: process.env.REFRESH_SECRET_KEY || 'refresh secret key',
-    TOKEN_ACTIVE_SECRET_KEY: process.env.ACTIVE_SECRET_KEY || 'active secret key',
+    TOKEN_ACCESS_SECRET_KEY: process.env.ACCESS_SECRET_KEY || 'ghjsfaekr584u3ijdmskmcf6541fx',
+    TOKEN_REFRESH_SECRET_KEY: process.env.REFRESH_SECRET_KEY || 'zsfnlqbi240t9khph756856gdh',
+    TOKEN_ACTIVE_SECRET_KEY: process.env.ACTIVE_SECRET_KEY || 'adsjuf3yqrf7uhcfncd2039ryh9fhd',
 
-    NO_REPLY_EMAIL: process.env.NO_REPLY_EMAIL || 'name@gmail.com',
-    NO_REPLY_EMAIL_PASSWORD: process.env.NO_REPLY_EMAIL_PASSWORD || 'Pa$$w0rD',
+    NO_REPLY_EMAIL: process.env.NO_REPLY_EMAIL || 'test@test.ua',
+    NO_REPLY_EMAIL_PASSWORD: process.env.NO_REPLY_EMAIL_PASSWORD || '12345',
     EMAIL_FOR_TEST_LETTERS: process.env.EMAIL_FOR_TEST_LETTERS,
 };

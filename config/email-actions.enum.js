@@ -1,5 +1,10 @@
 module.exports = {
-    DELETED_USER: 'deletedUser',
-    REGISTERED_USER: 'registeredUser',
-    UPDATED_USER: 'updatedUser'
+    ACCOUNT_AUTH: 'authAccount',
+    ACCOUNT_ACTIVATE: 'activateAccount',
+    ACCOUNT_CREATE: 'createAccount',
+    ACCOUNT_DELETE_ADMIN: 'deleteAccountAdmin',
+    ACCOUNT_DELETE_USER: 'deleteAccountUSER',
+    ACCOUNT_UPDATE: 'updateAccount',
+    PASSWORD_FORGOT: 'passwordForgot',
+    PASSWORD_CHANGE: 'passwordChange'
 };
