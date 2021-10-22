@@ -13,7 +13,7 @@ const {
 } = require('../config');
 const {User, TokenActive} = require('../dataBase');
 const {
-    dbService,
+    userService,
     emailService,
     passwordService,
     jwtService
@@ -26,7 +26,7 @@ module.exports = {
             const user = req.body;
 
             const hashedPassword = await passwordService.hash(user.password);
-            const createdUser = await dbService.createItem(User, {
+            const createdUser = await userService.createItem(User, {
                 ...user,
                 password: hashedPassword
             });
@@ -35,7 +35,7 @@ module.exports = {
 
             const token = jwtService.generateActiveToken();
 
-            await dbService.createItem(
+            await userService.createItem(
                 TokenActive,
                 {...token, token_purpose: tokenPurposeEnum.activateAccount, user: createdUser.id}
             );
@@ -62,7 +62,7 @@ module.exports = {
         try {
             const user = req.activeUser;
 
-            await dbService.updateItemById(User, user.id, {activatedByEmail: true});
+            await userService.updateItemById(User, user.id, {activatedByEmail: true});
 
             res.json(statusMessages.activatedAccount);
         } catch (e) {
@@ -74,7 +74,7 @@ module.exports = {
         try {
             const {query} = req;
 
-            const users = await dbService.findItemsByQuery(User, query);
+            const users = await userService.findItemsByQuery(User, query);
 
             const usersToReturn = users.map((item) => userNormalizer(item));
 
@@ -101,7 +101,7 @@ module.exports = {
             const {user_id} = req.params;
             const userData = req.body;
 
-            await dbService.deleteItemById(User, user_id);
+            await userService.deleteItemById(User, user_id);
 
             await emailService.sendMail(
                 variables.EMAIL_FOR_TEST_LETTERS || userData.item.email,
@@ -122,7 +122,7 @@ module.exports = {
             const {user_id} = req.params;
             const userData = req.body;
 
-            await dbService.updateItemById(User, user_id, userData);
+            await userService.updateItemById(User, user_id, userData);
 
             await emailService.sendMail(
                 variables.EMAIL_FOR_TEST_LETTERS || userData.item.email,

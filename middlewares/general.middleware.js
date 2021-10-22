@@ -1,6 +1,6 @@
 const {statusCodes, statusMessages} = require('../config');
 const {ErrorHandler} = require('../errors');
-const {dbService} = require('../services');
+const {userService} = require('../services');
 
 module.exports = {
     validateDataByDynamicParam: (validator, searchIn = 'body') => (req, res, next) => {
@@ -21,7 +21,7 @@ module.exports = {
         try {
             const value = req[searchIn][paramName];
 
-            const item = await dbService.findItem(itemModel, {[dbFiled]: value});
+            const item = await userService.findItem(itemModel, {[dbFiled]: value});
 
             req.body.item = item;
 

@@ -6,7 +6,7 @@ const {
 } = require('../config');
 const {TokenAuth, TokenActive} = require('../dataBase');
 const {ErrorHandler} = require('../errors');
-const {dbService, jwtService} = require('../services');
+const {userService, jwtService} = require('../services');
 
 module.exports = {
     validateAccessToken: async (req, res, next) => {
@@ -18,7 +18,7 @@ module.exports = {
 
             await jwtService.verifyToken(access_token);
 
-            const tokenFromDB = await dbService.findItemAndJoin(
+            const tokenFromDB = await userService.findItemAndJoin(
                 TokenAuth,
                 {access_token},
                 databaseTablesEnum.USER
@@ -45,7 +45,7 @@ module.exports = {
 
             await jwtService.verifyToken(refresh_token, TOKEN_TYPE_REFRESH);
 
-            const tokenFromDB = await dbService.findItemAndJoin(
+            const tokenFromDB = await userService.findItemAndJoin(
                 TokenAuth,
                 {refresh_token},
                 databaseTablesEnum.USER
@@ -73,7 +73,7 @@ module.exports = {
 
             await jwtService.verifyActiveToken(active_token);
 
-            const tokenFromDB = await dbService.findItemAndJoin(
+            const tokenFromDB = await userService.findItemAndJoin(
                 TokenActive,
                 {active_token},
                 databaseTablesEnum.USER

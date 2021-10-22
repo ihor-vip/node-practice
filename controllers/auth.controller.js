@@ -12,7 +12,7 @@ const {
 } = require('../config');
 const {TokenAuth, TokenActive, User} = require('../dataBase');
 const {
-    dbService,
+    userService,
     emailService,
     passwordService,
     jwtService
@@ -36,7 +36,7 @@ module.exports = {
 
             const tokenPair = jwtService.generateTokenPair();
 
-            await dbService.createItem(TokenAuth, {...tokenPair, user: user._id});
+            await userService.createItem(TokenAuth, {...tokenPair, user: user._id});
 
             await emailService.sendMail(
                 EMAIL_FOR_TEST_LETTERS || user.email,
@@ -56,7 +56,7 @@ module.exports = {
     logoutUser: async (req, res, next) => {
         try {
             const access_token = req.get(AUTHORIZATION);
-            await dbService.deleteItem(TokenAuth, {access_token});
+            await userService.deleteItem(TokenAuth, {access_token});
 
             res.status(statusCodes.deleted);
         } catch (e) {
@@ -69,11 +69,11 @@ module.exports = {
             const refresh_token = req.get(AUTHORIZATION);
             const user = req.loginUser;
 
-            await dbService.deleteItem(TokenAuth, {refresh_token});
+            await userService.deleteItem(TokenAuth, {refresh_token});
 
             const tokenPair = jwtService.generateTokenPair();
 
-            await dbService.createItem(TokenAuth, {...tokenPair, user: user._id});
+            await userService.createItem(TokenAuth, {...tokenPair, user: user._id});
 
             res.json({
                 ...tokenPair,
@@ -90,7 +90,7 @@ module.exports = {
 
             const token = jwtService.generateActiveToken();
 
-            await dbService.createItem(
+            await userService.createItem(
                 TokenActive,
                 {...token, token_purpose: tokenPurposeEnum.forgotPass, user: user._id}
             );
@@ -119,7 +119,7 @@ module.exports = {
             const {item: user, email, password} = req.body;
 
             const hashedPassword = await passwordService.hash(password);
-            await dbService.updateItemById(User, user.id, {password: hashedPassword});
+            await userService.updateItemById(User, user.id, {password: hashedPassword});
 
             await emailService.sendMail(
                 EMAIL_FOR_TEST_LETTERS || email,
@@ -140,7 +140,7 @@ module.exports = {
             await passwordService.compare(loginUser.password, old_password);
 
             const hashedPassword = await passwordService.hash(password);
-            await dbService.updateItemById(User, loginUser.id, {password: hashedPassword});
+            await userService.updateItemById(User, loginUser.id, {password: hashedPassword});
 
             await emailService.sendMail(
                 EMAIL_FOR_TEST_LETTERS || loginUser.email,
