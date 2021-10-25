@@ -105,7 +105,6 @@ module.exports = {
             );
 
             res.json({
-                ...token,
                 token_purpose: tokenPurposeEnum.forgotPass,
                 user: user._id
             });

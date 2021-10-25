@@ -21,8 +21,16 @@ const authEmailValidator = Joi.object({
         .required(),
 });
 
+const forgotPasswordValidator = Joi.object({
+    newPassword: Joi.string()
+        .min(6)
+        .regex(PASSWORD_REGEXP)
+        .required()
+});
+
 module.exports = {
     authValidator,
     authChangePassValidator,
-    authEmailValidator
+    authEmailValidator,
+    forgotPasswordValidator
 };

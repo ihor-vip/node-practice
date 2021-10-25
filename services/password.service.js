@@ -1,7 +1,7 @@
 const bcrypt = require('bcrypt');
 
-const {ErrorHandler} = require('../errors');
-const {statusCodes, statusMessages} = require('../config');
+const { ErrorHandler } = require('../errors');
+const { statusCodes, statusMessages } = require('../config');
 
 module.exports = {
     hash: (password) => bcrypt.hash(password, 10),

@@ -11,7 +11,7 @@ const {
     variables,
     userRolesEnum
 } = require('../config');
-const {User, TokenActive} = require('../dataBase');
+const { User, TokenActive } = require('../dataBase');
 const {
     userService,
     emailService,
@@ -50,7 +50,6 @@ module.exports = {
             );
 
             res.status(statusCodes.created).json({
-                ...token,
                 user: userToReturn
             });
         } catch (e) {

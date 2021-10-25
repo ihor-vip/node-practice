@@ -2,9 +2,9 @@ const EmailTemplates = require('email-templates');
 const nodemailer = require('nodemailer');
 const path = require('path');
 
-const {variables, statusCodes, statusMessages} = require('../config');
+const { variables, statusCodes, statusMessages } = require('../config');
 const allTemplates = require('../email-templates');
-const {ErrorHandler} = require('../errors');
+const { ErrorHandler } = require('../errors');
 
 const templateParser = new EmailTemplates({
     views: {
@@ -19,7 +19,7 @@ const sendMail = async (userMail, emailAction, context = {}) => {
         throw new ErrorHandler(statusCodes.serverError, statusMessages.wrongTemplate);
     }
 
-    const {templateName, subject} = templateInfo;
+    const { templateName, subject } = templateInfo;
     context.frontendURL = variables.FRONTEND_SITE;
 
     const html = await templateParser.render(templateName, context);

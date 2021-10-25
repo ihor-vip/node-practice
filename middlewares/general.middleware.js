@@ -47,5 +47,31 @@ module.exports = {
         } catch (e) {
             next(e);
         }
+    },
+
+    isBodyValid: (validator, authKey = 0) => (req, res, next) => {
+        try {
+            const {body} = req;
+
+            const {error} = validator.validate(body);
+
+            if (authKey && error) {
+                return next({
+                    message: statusMessages.notLogined,
+                    status: statusCodes.notValidData
+                });
+            }
+
+            if (error) {
+                return next({
+                    message: error.details[0].message,
+                    status: statusCodes.notValidData
+                });
+            }
+
+            next();
+        } catch (e) {
+            next(e);
+        }
     }
 };

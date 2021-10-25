@@ -8,7 +8,8 @@ const {
     generalMiddleware: {
         validateDataByDynamicParam,
         getItemByDynamicParam,
-        throwIfItemExist
+        throwIfItemExist,
+        isBodyValid
     }
 } = require('../middlewares');
 const {authValidator} = require('../validators');
@@ -45,10 +46,8 @@ router.post(
 
 router.patch(
     '/password/forgot',
-    validateDataByDynamicParam(authValidator.authValidator),
+    isBodyValid(authValidator.forgotPasswordValidator),
     authMiddleware.validateActiveToken,
-    getItemByDynamicParam(User, middlewareVars.email),
-    throwIfItemExist(false),
     authController.passwordForgotChange
 );
 
