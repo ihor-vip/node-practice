@@ -1,7 +1,10 @@
 module.exports = {
+    NODE_ENV: process.env.NODE_ENV || 'dev',
+
     PORT: process.env.PORT || 5000,
     MONGO_CONNECT: process.env.MONGO_CONNECT || 'mongodb://localhost:27017/june-2021',
     FRONTEND_SITE: process.env.FRONTEND_SITE || 'https://stackoverflow.com/',
+    ALLOWED_ORIGIN: process.env.ALLOWED_ORIGIN,
 
     FORM_MASSAGE: 'login form',
 
@@ -15,4 +18,6 @@ module.exports = {
     NO_REPLY_EMAIL: process.env.NO_REPLY_EMAIL || 'name@gmail.com',
     NO_REPLY_EMAIL_PASSWORD: process.env.NO_REPLY_EMAIL_PASSWORD || 'Pa$$w0rD',
     EMAIL_FOR_TEST_LETTERS: process.env.EMAIL_FOR_TEST_LETTERS,
+
+    DEFAULT_ADMIN_PASSWORD: process.env.DEFAULT_ADMIN_PASSWORD
 };

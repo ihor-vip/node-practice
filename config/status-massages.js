@@ -12,5 +12,6 @@ module.exports = {
     noToken: 'No token',
     paswordUpdated: 'Password is updated',
     updated: 'Item is updated',
-    wrongTemplate: 'wrong template name'
+    wrongTemplate: 'wrong template name',
+    corsNotAllowed: 'CORS is not allowed'
 };
