@@ -1,4 +1,4 @@
-const { userRolesEnum: { ADMIN }, DEFAULT_ADMIN_PASSWORD } = require('../config');
+const { userRolesEnum: { ADMIN }, variables: {DEFAULT_ADMIN_PASSWORD} } = require('../config');
 const { User } = require('../dataBase');
 const { passwordService } = require('../services');
 
