@@ -126,7 +126,7 @@ module.exports = {
                 {userName: user.name}
             );
 
-            res.status(statusCodes.updated).json(statusMessages.paswordUpdated);
+            res.status(statusCodes.ok).json(statusMessages.paswordUpdated);
         } catch (e) {
             next(e);
         }
