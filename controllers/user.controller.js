@@ -16,7 +16,8 @@ const {
     userService,
     emailService,
     passwordService,
-    jwtService
+    jwtService,
+    queryService
 } = require('../services');
 const {userUtil: {userNormalizer}} = require('../utils');
 
@@ -71,9 +72,9 @@ module.exports = {
 
     getAllOrByQuery: async (req, res, next) => {
         try {
-            const {query} = req;
+            const { query } = req;
 
-            const users = await userService.findItemsByQuery(User, query);
+            const users = await queryService.getAll(query);
 
             const usersToReturn = users.map((item) => userNormalizer(item));
 

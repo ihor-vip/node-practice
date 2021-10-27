@@ -7,6 +7,7 @@ module.exports = {
     ALLOWED_ORIGIN: process.env.ALLOWED_ORIGIN,
 
     FORM_MASSAGE: 'login form',
+    CURRENT_YEAR: new Date().getFullYear(),
 
     AUTHORIZATION: 'Authorization',
     TOKEN_TYPE_ACCESS: 'access',

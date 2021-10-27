@@ -13,5 +13,6 @@ module.exports = {
     paswordUpdated: 'Password is updated',
     updated: 'Item is updated',
     wrongTemplate: 'wrong template name',
-    corsNotAllowed: 'CORS is not allowed'
+    corsNotAllowed: 'CORS is not allowed',
+    modelExists: 'Model is already exist'
 };

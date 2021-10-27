@@ -7,4 +7,7 @@ module.exports = {
     user_id: 'user_id',
     email: 'email',
     activatedByEmail: 'activatedByEmail',
+
+    car_id: 'car_id',
+    model: 'model'
 };
