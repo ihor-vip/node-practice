@@ -1,12 +1,12 @@
 {
   "swagger": "2.0",
   "info": {
-    "title": "HomeWorks Node.js",
+    "title": "Node.js",
     "version": "0.0.1",
-    "description": "HomeWorks Node.js",
+    "description": "Node.js",
     "contact": {
-      "name": "Anna Novik",
-      "email": "annie5donchenko@gmail.com"
+      "name": "Ihor Ploskodnyak",
+      "email": "vip20140902@gmail.com"
     }
   },
   "paths": {
