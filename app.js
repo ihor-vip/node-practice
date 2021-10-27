@@ -13,7 +13,7 @@ const {variables: {PORT, MONGO_CONNECT, NODE_ENV, ALLOWED_ORIGIN, },
 const { ErrorHandler } = require('./errors');
 const startCron = require('./cron');
 const { checkDefaultData } = require('./utils');
-const swaggerJson = require('.docs/swagger.json');
+const swaggerJson = require('./docs/swagger.json');
 
 const app = express();
 
