@@ -1,6 +1,4 @@
-const checkDefaultData = require('./default-data.util');
-
 module.exports = {
-    checkDefaultData,
+    dbInitializationService: require('./db-initialization.util'),
     userUtil: require('./user.util')
 };

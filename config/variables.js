@@ -20,5 +20,11 @@ module.exports = {
     NO_REPLY_EMAIL_PASSWORD: process.env.NO_REPLY_EMAIL_PASSWORD || 'Pa$$w0rD',
     EMAIL_FOR_TEST_LETTERS: process.env.EMAIL_FOR_TEST_LETTERS,
 
+    SUPER_ADMIN_NAME: process.env.SUPER_ADMIN_NAME || 'Super Name',
+    SUPER_ADMIN_EMAIL: process.env.SUPER_ADMIN_EMAIL || 'super@admin.com',
+    SUPER_ADMIN_PASSWORD: process.env.SUPER_ADMIN_PASSWORD || 'Adm1Nn_Pa$$w0rD',
+
+    CRON_EXP_OLD_TOKENS: '0 0 1 * *',
+
     DEFAULT_ADMIN_PASSWORD: process.env.DEFAULT_ADMIN_PASSWORD
 };

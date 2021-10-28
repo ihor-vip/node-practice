@@ -1,18 +1,16 @@
+const cors = require('cors');
 const express = require('express');
 const mongoose = require('mongoose');
-const cors = require('cors');
-const rateLimit = require('express-rate-limit');
 const helmet = require('helmet');
+const expressRateLimit = require('express-rate-limit');
 const swaggerUI = require('swagger-ui-express');
 
 require('dotenv').config();
 
-const {variables: {PORT, MONGO_CONNECT, NODE_ENV, ALLOWED_ORIGIN, },
-    statusMessages: { corsNotAllowed }
-} = require('./config');
+const { variables: { PORT, MONGO_CONNECT, ALLOWED_ORIGINS }, statusCodes, statusMessages } = require('./config');
+const { dbInitializationService: { initializeUserCollection } } = require('./utils');
 const { ErrorHandler } = require('./errors');
-const startCron = require('./cron');
-const { checkDefaultData } = require('./utils');
+const cronJobs = require('./cron');
 const swaggerJson = require('./docs/swagger.json');
 
 const app = express();
@@ -20,53 +18,67 @@ const app = express();
 mongoose.connect(MONGO_CONNECT);
 
 app.use(helmet());
+
 app.use(cors({ origin: _configureCors }));
-app.use(rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100 // limit each IP to 100 requests per windowMs
+
+app.use(expressRateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 1000
 }));
 
-if (NODE_ENV === 'dev') {
-    const morgan = require('morgan');
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
+if (process.env.NODE_ENV === 'dev') {
+    const morgan = require('morgan');
     app.use(morgan('dev'));
 }
 
-app.use(express.json());
-app.use(express.urlencoded({extended: true}));
+const { authRouter, carRouter, userRouter } = require('./routes');
 
-const {authRouter, userRouter, carRouter} = require('./routes');
+app.get('/', (req, res) => res.redirect('/users'));
 app.use('/docs', swaggerUI.serve, swaggerUI.setup(swaggerJson));
 
 app.use('/auth', authRouter);
-app.use('/users', userRouter);
 app.use('/cars', carRouter);
+app.use('/users', userRouter);
+
+app.use('*', _notFoundError);
+app.use(_mainErrorHandler);
+
+app.listen(PORT, () => {
+    console.log('App listen on ', PORT);
+
+    cronJobs();
+});
+
+initializeUserCollection();
+
+function _notFoundError(err, req, res, next) {
+    next({
+        status: err.status || statusCodes.notFound,
+        message: err.message || statusMessages.notFound
+    });
+}
+
 // eslint-disable-next-line no-unused-vars
-app.use('*', (err, req, res, next) => {
+function _mainErrorHandler(err, req, res, next) {
     res
-        .status(err.status || PORT)
+        .status(err.status || statusCodes.serverError)
         .json({
             message: err.message
         });
-});
-
-app.listen(PORT, (err) => {
-    if (!err) {
-        console.log('App listen on ', PORT);
-        checkDefaultData();
-        startCron();
-    }
-});
+}
 
 function _configureCors(origin, callback) {
-    if (NODE_ENV === 'dev') {
+    const whiteList = ALLOWED_ORIGINS.split(';');
+
+    if (!origin && process.env.NODE_ENV === 'dev') {
         return callback(null, true);
     }
 
-    const whiteList = ALLOWED_ORIGIN.split(';');
-
     if (!whiteList.includes(origin)) {
-        return callback(new ErrorHandler(corsNotAllowed), false);
+        return callback(new ErrorHandler(statusCodes.forbidden, statusMessages.corsNotAllowed), false);
     }
 
     return callback(null, true);
