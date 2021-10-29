@@ -1,12 +1,12 @@
-const {statusCodes, statusMessages} = require('../config');
-const {ErrorHandler} = require('../errors');
+const { statusCodes, statusMessages } = require('../config');
+const { ErrorHandler } = require('../errors');
 
 module.exports = {
     checkUserPermission: (rolesArr = []) => (req, res, next) => {
         try {
-            const {role} = req.loginUser;
+            const { role } = req.loginUser;
             const user = req.loginUser;
-            const {user_id} = req.params;
+            const { user_id } = req.params;
 
             if (user.id === user_id) {
                 req.userPermission = user.id;

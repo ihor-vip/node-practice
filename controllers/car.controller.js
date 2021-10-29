@@ -1,11 +1,11 @@
 const { statusCodes, statusMessages } = require('../config');
 const { Car } = require('../dataBase');
-const { userService, carService } = require('../services');
+const { dbService, carService } = require('../services');
 
 module.exports = {
     create: async (req, res, next) => {
         try {
-            const createdCar = await userService.createItem(Car, req.body);
+            const createdCar = await dbService.createItem(Car, req.body);
 
             res.status(statusCodes.created).json(createdCar);
         } catch (e) {
@@ -39,7 +39,7 @@ module.exports = {
         try {
             const { car_id } = req.params;
 
-            await userService.deleteItemById(Car, car_id);
+            await dbService.deleteItemById(Car, car_id);
 
             res.status(statusCodes.deleted).json(statusMessages.deleted);
         } catch (e) {
@@ -52,7 +52,7 @@ module.exports = {
             const { car_id } = req.params;
             const newCarData = req.body;
 
-            await userService.updateItemById(Car, car_id, newCarData);
+            await dbService.updateItemById(Car, car_id, newCarData);
 
             res.status(statusCodes.updated).json(statusMessages.updated);
         } catch (e) {

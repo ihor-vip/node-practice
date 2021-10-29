@@ -1,30 +1,43 @@
 module.exports = {
-    NODE_ENV: process.env.NODE_ENV || 'dev',
-
     PORT: process.env.PORT || 5000,
-    MONGO_CONNECT: process.env.MONGO_CONNECT || 'mongodb://localhost:27017/june-2021',
-    FRONTEND_SITE: process.env.FRONTEND_SITE || 'https://stackoverflow.com/',
-    ALLOWED_ORIGIN: process.env.ALLOWED_ORIGIN,
+    DBPath: process.env.DBPath || 'mongodb://localhost:27017/june-2021',
+    FRONTEND_SITE: process.env.FRONTEND_SITE || 'http://somesite.com',
 
-    FORM_MASSAGE: 'login form',
     CURRENT_YEAR: new Date().getFullYear(),
+    FORM_MASSAGE: 'login form',
 
     AUTHORIZATION: 'Authorization',
     TOKEN_TYPE_ACCESS: 'access',
     TOKEN_TYPE_REFRESH: 'refresh',
-    TOKEN_ACCESS_SECRET_KEY: process.env.ACCESS_SECRET_KEY || 'access secret key',
-    TOKEN_REFRESH_SECRET_KEY: process.env.REFRESH_SECRET_KEY || 'refresh secret key',
-    TOKEN_ACTIVE_SECRET_KEY: process.env.ACTIVE_SECRET_KEY || 'active secret key',
+    TOKEN_ACCESS_SECRET_KEY: process.env.ACCESS_SECRET_KEY || 'ghjsfaekr584u3ijdmskmcf6541fx',
+    TOKEN_REFRESH_SECRET_KEY: process.env.REFRESH_SECRET_KEY || 'zsfnlqbi240t9khph756856gdh',
+    TOKEN_ACTIVE_SECRET_KEY: process.env.ACTIVE_SECRET_KEY || 'adsjuf3yqrf7uhcfncd2039ryh9fhd',
+    TOKEN_ACTIVATE_ACCOUNT_SECRET_KEY: process.env.TOKEN_ACTIVATE_ACCOUNT_SECRET_KEY || 'slkjfdslajfw9udsiadjmlaskmc',
+    TOKEN_FORGOT_PASSWORD_SECRET_KEY: process.env.TOKEN_FORGOT_PASSWORD_SECRET_KEY || 'ascm,wo[eijncwou[ecno[m',
+    TOKEN_PASSWORD_CHANGE_ADMIN_SECRET_KEY: process.env.TOKEN_PASSWORD_CHANGE_ADMIN_SECRET_KEY || 'asdmpoq394937hdnsmdd0293',
 
-    NO_REPLY_EMAIL: process.env.NO_REPLY_EMAIL || 'name@gmail.com',
-    NO_REPLY_EMAIL_PASSWORD: process.env.NO_REPLY_EMAIL_PASSWORD || 'Pa$$w0rD',
+    NO_REPLY_EMAIL: process.env.NO_REPLY_EMAIL || 'test@test.ua',
+    NO_REPLY_EMAIL_PASSWORD: process.env.NO_REPLY_EMAIL_PASSWORD || '12345',
     EMAIL_FOR_TEST_LETTERS: process.env.EMAIL_FOR_TEST_LETTERS,
 
-    SUPER_ADMIN_NAME: process.env.SUPER_ADMIN_NAME || 'Super Name',
-    SUPER_ADMIN_EMAIL: process.env.SUPER_ADMIN_EMAIL || 'super@admin.com',
-    SUPER_ADMIN_PASSWORD: process.env.SUPER_ADMIN_PASSWORD || 'Adm1Nn_Pa$$w0rD',
+    SUPER_ADMIN_NAME: process.env.SUPER_ADMIN_NAME || 'Super Admin',
+    SUPER_ADMIN_EMAIL: process.env.SUPER_ADMIN_EMAIL || 'admin@example.com',
+    SUPER_ADMIN_PASSWORD: process.env.SUPER_ADMIN_PASSWORD || '1dfgRl&4bN23s',
+
+    PHOTO_MAX_SIZE: 5 * 1024 * 1024,
+    MIMETYPES: {
+        PHOTO: [
+            'image/jpeg',
+            'image/png'
+        ]
+    },
+    AWS_S3_NAME: process.env.AWS_S3_NAME || '',
+    AWS_S3_REGION: process.env.AWS_S3_REGION || '',
+    AWS_S3_ACCESS_KEY: process.env.AWS_S3_ACCESS_KEY || '',
+    AWS_S3_SECRET_KEY: process.env.AWS_S3_SECRET_KEY || '',
+
+    ALLOWED_ORIGINS: process.env.ALLOWED_ORIGINS || 'http://localhost:3000',
 
     CRON_EXP_OLD_TOKENS: '0 0 1 * *',
-
-    DEFAULT_ADMIN_PASSWORD: process.env.DEFAULT_ADMIN_PASSWORD
+    CRON_EXP_SEND_MAILS: '30 6 * * mon,wed,fri'
 };

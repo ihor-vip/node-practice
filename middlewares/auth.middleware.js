@@ -1,12 +1,12 @@
 const {
     databaseTablesEnum,
-    variables: {AUTHORIZATION, TOKEN_TYPE_REFRESH},
+    variables: { AUTHORIZATION, TOKEN_TYPE_REFRESH },
     statusCodes,
     statusMessages
 } = require('../config');
-const {TokenAuth, TokenActive} = require('../dataBase');
-const {ErrorHandler} = require('../errors');
-const {userService, jwtService} = require('../services');
+const { TokenAuth, TokenActive } = require('../dataBase');
+const { ErrorHandler } = require('../errors');
+const { dbService, jwtService } = require('../services');
 
 module.exports = {
     validateAccessToken: async (req, res, next) => {
@@ -18,9 +18,9 @@ module.exports = {
 
             await jwtService.verifyToken(access_token);
 
-            const tokenFromDB = await userService.findItemAndJoin(
+            const tokenFromDB = await dbService.findItemAndJoin(
                 TokenAuth,
-                {access_token},
+                { access_token },
                 databaseTablesEnum.USER
             );
 
@@ -45,9 +45,9 @@ module.exports = {
 
             await jwtService.verifyToken(refresh_token, TOKEN_TYPE_REFRESH);
 
-            const tokenFromDB = await userService.findItemAndJoin(
+            const tokenFromDB = await dbService.findItemAndJoin(
                 TokenAuth,
-                {refresh_token},
+                { refresh_token },
                 databaseTablesEnum.USER
             );
 
@@ -63,7 +63,7 @@ module.exports = {
         }
     },
 
-    validateActiveToken: async (req, res, next) => {
+    validateActiveToken: (token_purpose) => async (req, res, next) => {
         try {
             const active_token = req.get(AUTHORIZATION);
 
@@ -71,11 +71,11 @@ module.exports = {
                 throw new ErrorHandler(statusCodes.invalidToken, statusMessages.noToken);
             }
 
-            await jwtService.verifyActiveToken(active_token);
+            await jwtService.verifyActiveToken(active_token, token_purpose);
 
-            const tokenFromDB = await userService.findItemAndJoin(
+            const tokenFromDB = await dbService.findItemAndJoin(
                 TokenActive,
-                {active_token},
+                { active_token, token_purpose },
                 databaseTablesEnum.USER
             );
 
@@ -84,6 +84,9 @@ module.exports = {
             }
 
             req.activeUser = tokenFromDB.user;
+
+            await dbService.deleteItemById(TokenActive, tokenFromDB.id);
+
             next();
         } catch (e) {
             next(e);

@@ -2,12 +2,13 @@ const cors = require('cors');
 const express = require('express');
 const mongoose = require('mongoose');
 const helmet = require('helmet');
+const expressFileUpload = require('express-fileupload');
 const expressRateLimit = require('express-rate-limit');
 const swaggerUI = require('swagger-ui-express');
 
 require('dotenv').config();
 
-const { variables: { PORT, MONGO_CONNECT, ALLOWED_ORIGINS }, statusCodes, statusMessages } = require('./config');
+const { variables: { PORT, DBPath, ALLOWED_ORIGINS }, statusCodes, statusMessages } = require('./config');
 const { dbInitializationService: { initializeUserCollection } } = require('./utils');
 const { ErrorHandler } = require('./errors');
 const cronJobs = require('./cron');
@@ -15,7 +16,7 @@ const swaggerJson = require('./docs/swagger.json');
 
 const app = express();
 
-mongoose.connect(MONGO_CONNECT);
+mongoose.connect(DBPath);
 
 app.use(helmet());
 
@@ -28,8 +29,10 @@ app.use(expressRateLimit({
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(expressFileUpload());
 
 if (process.env.NODE_ENV === 'dev') {
+    // eslint-disable-next-line import/no-extraneous-dependencies
     const morgan = require('morgan');
     app.use(morgan('dev'));
 }

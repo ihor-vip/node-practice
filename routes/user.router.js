@@ -1,8 +1,8 @@
 const router = require('express').Router();
 
-const {middlewareVars} = require('../config');
-const {userController} = require('../controllers');
-const {User} = require('../dataBase');
+const { middlewareVars, tokenPurposeEnum } = require('../config');
+const { userController } = require('../controllers');
+const { User } = require('../dataBase');
 const {
     authMiddleware,
     generalMiddleware: {
@@ -10,13 +10,15 @@ const {
         getItemByDynamicParam,
         throwIfItemExist
     },
+    fileMiddleware,
     userMiddleware
 } = require('../middlewares');
-const {userValidator} = require('../validators');
+const { userValidator, authValidator } = require('../validators');
 
 router.post(
     '/',
     validateDataByDynamicParam(userValidator.createUserValidator),
+    fileMiddleware.checkAvatar,
     getItemByDynamicParam(User, middlewareVars.email),
     throwIfItemExist(),
     userController.create
@@ -41,6 +43,7 @@ router.patch(
     '/:user_id',
     validateDataByDynamicParam(userValidator.userIdValidator, middlewareVars.params),
     validateDataByDynamicParam(userValidator.updateUserValidator),
+    fileMiddleware.checkAvatar,
     authMiddleware.validateAccessToken,
     getItemByDynamicParam(User, middlewareVars.user_id, middlewareVars.params, middlewareVars.id),
     throwIfItemExist(false),
@@ -62,8 +65,28 @@ router.delete(
 
 router.post(
     '/activateAccount',
-    authMiddleware.validateActiveToken,
+    authMiddleware.validateActiveToken(tokenPurposeEnum.activateAccount),
     userController.activateAccount
+);
+
+router.post(
+    '/admin/create',
+    validateDataByDynamicParam(userValidator.createAdminValidator),
+    authMiddleware.validateAccessToken,
+    userMiddleware.checkUserPermission([
+        'admin',
+        'super admin'
+    ]),
+    getItemByDynamicParam(User, middlewareVars.email),
+    throwIfItemExist(),
+    userController.createAdmin
+);
+
+router.patch(
+    '/admin/password/change',
+    authMiddleware.validateActiveToken(tokenPurposeEnum.passwordChangeAdmin),
+    validateDataByDynamicParam(authValidator.authPassValidator),
+    userController.changePassAdmin
 );
 
 module.exports = router;

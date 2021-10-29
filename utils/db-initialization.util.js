@@ -1,5 +1,5 @@
 const { userRolesEnum, variables } = require('../config');
-const { userService, passwordService } = require('../services');
+const { dbService, passwordService } = require('../services');
 const { User } = require('../dataBase');
 
 const _firstUserCreate = async () => {
@@ -12,7 +12,7 @@ const _firstUserCreate = async () => {
     };
 
     const hashedPassword = await passwordService.hash(user.password);
-    const createdUser = await userService.createItem(
+    const createdUser = await dbService.createItem(
         User,
         { ...user, password: hashedPassword }
     );
@@ -25,7 +25,7 @@ module.exports = {
     initializeUserCollection: async () => {
         const count = await User.countDocuments();
 
-        if (count > 0) {return;}
+        if (count > 0) return;
 
         await _firstUserCreate();
     }

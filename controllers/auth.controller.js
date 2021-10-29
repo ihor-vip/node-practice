@@ -10,14 +10,14 @@ const {
     statusCodes,
     statusMessages
 } = require('../config');
-const {TokenAuth, TokenActive, User} = require('../dataBase');
+const { TokenAuth, TokenActive, User } = require('../dataBase');
 const {
-    userService,
+    dbService,
     emailService,
     passwordService,
     jwtService
 } = require('../services');
-const {userUtil: {userNormalizer}} = require('../utils');
+const { userUtil: { userNormalizer } } = require('../utils');
 
 module.exports = {
     renderLoginForm: (req, res, next) => {
@@ -30,18 +30,18 @@ module.exports = {
 
     loginUser: async (req, res, next) => {
         try {
-            const {item: user, password} = req.body;
+            const { item: user, password } = req.body;
 
             await passwordService.compare(user.password, password);
 
             const tokenPair = jwtService.generateTokenPair();
 
-            await userService.createItem(TokenAuth, {...tokenPair, user: user._id});
+            await dbService.createItem(TokenAuth, { ...tokenPair, user: user._id });
 
             await emailService.sendMail(
                 EMAIL_FOR_TEST_LETTERS || user.email,
                 emailActionsEnum.ACCOUNT_AUTH,
-                {userName: user.name}
+                { userName: user.name }
             );
 
             res.json({
@@ -56,7 +56,7 @@ module.exports = {
     logoutUser: async (req, res, next) => {
         try {
             const access_token = req.get(AUTHORIZATION);
-            await userService.deleteItem(TokenAuth, {access_token});
+            await dbService.deleteItem(TokenAuth, { access_token });
 
             res.status(statusCodes.deleted);
         } catch (e) {
@@ -69,11 +69,11 @@ module.exports = {
             const refresh_token = req.get(AUTHORIZATION);
             const user = req.loginUser;
 
-            await userService.deleteItem(TokenAuth, {refresh_token});
+            await dbService.deleteItem(TokenAuth, { refresh_token });
 
             const tokenPair = jwtService.generateTokenPair();
 
-            await userService.createItem(TokenAuth, {...tokenPair, user: user._id});
+            await dbService.createItem(TokenAuth, { ...tokenPair, user: user._id });
 
             res.json({
                 ...tokenPair,
@@ -86,13 +86,13 @@ module.exports = {
 
     passwordForgotSendEmail: async (req, res, next) => {
         try {
-            const {item: user, email} = req.body;
+            const { item: user, email } = req.body;
 
-            const token = jwtService.generateActiveToken();
+            const token = jwtService.generateActiveToken(tokenPurposeEnum.forgotPass);
 
-            await userService.createItem(
+            await dbService.createItem(
                 TokenActive,
-                {...token, token_purpose: tokenPurposeEnum.forgotPass, user: user._id}
+                { ...token, token_purpose: tokenPurposeEnum.forgotPass, user: user._id }
             );
 
             await emailService.sendMail(
@@ -105,6 +105,7 @@ module.exports = {
             );
 
             res.json({
+                ...token,
                 token_purpose: tokenPurposeEnum.forgotPass,
                 user: user._id
             });
@@ -115,15 +116,15 @@ module.exports = {
 
     passwordForgotChange: async (req, res, next) => {
         try {
-            const {item: user, email, password} = req.body;
+            const { item: user, email, password } = req.body;
 
             const hashedPassword = await passwordService.hash(password);
-            await userService.updateItemById(User, user.id, {password: hashedPassword});
+            await dbService.updateItemById(User, user.id, { password: hashedPassword });
 
             await emailService.sendMail(
                 EMAIL_FOR_TEST_LETTERS || email,
                 emailActionsEnum.PASSWORD_CHANGE,
-                {userName: user.name}
+                { userName: user.name }
             );
 
             res.status(statusCodes.updated).json(statusMessages.paswordUpdated);
@@ -134,17 +135,19 @@ module.exports = {
 
     passwordChange: async (req, res, next) => {
         try {
-            const {loginUser, body: {old_password, password}} = req;
+            const { loginUser, body: { old_password, password } } = req;
 
             await passwordService.compare(loginUser.password, old_password);
 
             const hashedPassword = await passwordService.hash(password);
-            await userService.updateItemById(User, loginUser.id, {password: hashedPassword});
+            await dbService.updateItemById(User, loginUser.id, { password: hashedPassword });
+
+            await dbService.deleteItems(TokenAuth, { user: loginUser.id });
 
             await emailService.sendMail(
                 EMAIL_FOR_TEST_LETTERS || loginUser.email,
                 emailActionsEnum.PASSWORD_CHANGE,
-                {userName: loginUser.name}
+                { userName: loginUser.name }
             );
 
             res.status(statusCodes.updated).json(statusMessages.paswordUpdated);

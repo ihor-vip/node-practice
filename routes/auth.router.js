@@ -1,18 +1,17 @@
 const router = require('express').Router();
 
-const {middlewareVars} = require('../config');
-const {authController} = require('../controllers');
-const {User} = require('../dataBase');
+const { middlewareVars, tokenPurposeEnum } = require('../config');
+const { authController } = require('../controllers');
+const { User } = require('../dataBase');
 const {
     authMiddleware,
     generalMiddleware: {
         validateDataByDynamicParam,
         getItemByDynamicParam,
-        throwIfItemExist,
-        isBodyValid
+        throwIfItemExist
     }
 } = require('../middlewares');
-const {authValidator} = require('../validators');
+const { authValidator } = require('../validators');
 
 router.get('/', authController.renderLoginForm);
 
@@ -46,8 +45,10 @@ router.post(
 
 router.patch(
     '/password/forgot',
-    isBodyValid(authValidator.forgotPasswordValidator),
-    authMiddleware.validateActiveToken,
+    validateDataByDynamicParam(authValidator.authValidator),
+    authMiddleware.validateActiveToken(tokenPurposeEnum.forgotPass),
+    getItemByDynamicParam(User, middlewareVars.email),
+    throwIfItemExist(false),
     authController.passwordForgotChange
 );
 

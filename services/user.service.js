@@ -1,17 +1,42 @@
+const { User } = require('../dataBase');
+
 module.exports = {
-    createItem: (schema, newItemData) => schema.create(newItemData),
+    getAll: async (query = {}) => {
+        const {
+            perPage = 10,
+            page = 1,
+            sortBy = 'createdAt',
+            order = 'asc',
+            ...filters
+        } = query;
 
-    findItemsByQuery: (schema, query) => schema.find(query),
+        const orderBy = order === 'asc' ? -1 : 1;
 
-    findItemById: (schema, itemId) => schema.findById(itemId),
+        const filterObject = {};
 
-    findItem: (schema, filter) => schema.findOne(filter),
+        Object.keys(filters).forEach((filterParam) => {
+            switch (filterParam) {
+                case 'userRole': {
+                    const rolesArr = filters.userRole.split(';');
+                    filterObject.role = { $in: rolesArr };
+                    break;
+                }
+                case 'name': {
+                    filterObject.name = { $regex: `^${filters.name}`, $options: 'gi' };
+                    break;
+                }
+                default: {
+                    filterObject[filterParam] = filters[filterParam];
+                }
+            }
+        });
 
-    findItemAndJoin: (schema, filter, tableToJoin) => schema.findOne(filter).populate(tableToJoin),
+        const users = await User
+            .find(filterObject)
+            .sort({ [sortBy]: orderBy })
+            .limit(+perPage)
+            .skip((page - 1) * perPage);
 
-    deleteItemById: (schema, itemId) => schema.deleteOne({ _id: itemId }),
-
-    deleteItem: (schema, filter) => schema.deleteOne(filter),
-
-    updateItemById: (schema, itemId, newItemData) => schema.updateOne({ _id: itemId }, newItemData)
+        return users;
+    }
 };

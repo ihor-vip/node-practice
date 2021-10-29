@@ -1,25 +1,29 @@
 const {
+    databaseTablesEnum,
     emailActionsEnum: {
         ACCOUNT_CREATE,
+        ACCOUNT_ADMIN_CREATE,
         ACCOUNT_DELETE_ADMIN,
         ACCOUNT_DELETE_USER,
-        ACCOUNT_UPDATE
+        ACCOUNT_UPDATE,
+        PASSWORD_CHANGE
     },
     statusCodes,
     statusMessages,
     tokenPurposeEnum,
     variables,
-    userRolesEnum
+    userRolesEnum,
 } = require('../config');
 const { User, TokenActive } = require('../dataBase');
 const {
-    userService,
+    dbService,
     emailService,
-    passwordService,
     jwtService,
-    queryService
+    passwordService,
+    s3Service,
+    userService
 } = require('../services');
-const {userUtil: {userNormalizer}} = require('../utils');
+const { userUtil: { userNormalizer } } = require('../utils');
 
 module.exports = {
     create: async (req, res, next) => {
@@ -27,18 +31,28 @@ module.exports = {
             const user = req.body;
 
             const hashedPassword = await passwordService.hash(user.password);
-            const createdUser = await userService.createItem(User, {
-                ...user,
-                password: hashedPassword
-            });
+            let createdUser = await dbService.createItem(
+                User,
+                { ...user, password: hashedPassword }
+            );
+
+            if (req.files && req.files.avatar) {
+                const s3Response = await s3Service.uploadFile(req.files.avatar, databaseTablesEnum.USER, createdUser._id);
+
+                createdUser = await dbService.updateItemByIdAndReturn(
+                    User,
+                    createdUser._id,
+                    { avatar: s3Response.Location }
+                );
+            }
 
             const userToReturn = userNormalizer(createdUser);
 
-            const token = jwtService.generateActiveToken();
+            const token = jwtService.generateActiveToken(tokenPurposeEnum.activateAccount);
 
-            await userService.createItem(
+            await dbService.createItem(
                 TokenActive,
-                {...token, token_purpose: tokenPurposeEnum.activateAccount, user: createdUser.id}
+                { ...token, token_purpose: tokenPurposeEnum.activateAccount, user: createdUser.id }
             );
 
             await emailService.sendMail(
@@ -50,9 +64,43 @@ module.exports = {
                 }
             );
 
-            res.status(statusCodes.created).json({
-                user: userToReturn
+            res.status(statusCodes.created).json(userToReturn);
+        } catch (e) {
+            next(e);
+        }
+    },
+
+    createAdmin: async (req, res, next) => {
+        try {
+            const user = req.body;
+            const { loginUser } = req;
+
+            const hashedPassword = await passwordService.hash(user.password);
+            const createdUser = await dbService.createItem(User, {
+                ...user,
+                password: hashedPassword
             });
+
+            const userToReturn = userNormalizer(createdUser);
+
+            const token = jwtService.generateActiveToken(tokenPurposeEnum.passwordChangeAdmin);
+
+            await dbService.createItem(
+                TokenActive,
+                { ...token, token_purpose: tokenPurposeEnum.passwordChangeAdmin, user: createdUser.id }
+            );
+
+            await emailService.sendMail(
+                variables.EMAIL_FOR_TEST_LETTERS || createdUser.email,
+                ACCOUNT_ADMIN_CREATE,
+                {
+                    userName: createdUser.name,
+                    adminName: loginUser.name,
+                    activeTokenLink: `${variables.FRONTEND_SITE}?${variables.AUTHORIZATION}=${token.active_token}`
+                }
+            );
+
+            res.status(statusCodes.created).json(userToReturn);
         } catch (e) {
             next(e);
         }
@@ -62,9 +110,32 @@ module.exports = {
         try {
             const user = req.activeUser;
 
-            await userService.updateItemById(User, user.id, {activatedByEmail: true});
+            await dbService.updateItemById(User, user.id, { activatedByEmail: true });
 
             res.json(statusMessages.activatedAccount);
+        } catch (e) {
+            next(e);
+        }
+    },
+
+    changePassAdmin: async (req, res, next) => {
+        try {
+            const { activeUser, body: { password } } = req;
+
+            const hashedPassword = await passwordService.hash(password);
+
+            await dbService.updateItemById(User, activeUser.id, {
+                activatedByEmail: true,
+                password: hashedPassword
+            });
+
+            await emailService.sendMail(
+                variables.EMAIL_FOR_TEST_LETTERS || activeUser.email,
+                PASSWORD_CHANGE,
+                { userName: activeUser.name }
+            );
+
+            res.status(statusCodes.updated).json(statusMessages.paswordUpdated);
         } catch (e) {
             next(e);
         }
@@ -74,7 +145,7 @@ module.exports = {
         try {
             const { query } = req;
 
-            const users = await queryService.getAll(query);
+            const users = await userService.getAll(query);
 
             const usersToReturn = users.map((item) => userNormalizer(item));
 
@@ -86,7 +157,7 @@ module.exports = {
 
     getOneById: (req, res, next) => {
         try {
-            const {item: user} = req.body;
+            const { item: user } = req.body;
 
             const userToReturn = userNormalizer(user);
 
@@ -98,10 +169,14 @@ module.exports = {
 
     deleteById: async (req, res, next) => {
         try {
-            const {user_id} = req.params;
+            const { user_id } = req.params;
             const userData = req.body;
 
-            await userService.deleteItemById(User, user_id);
+            if (userData.item.avatar) {
+                await s3Service.deleteFile(userData.item.avatar);
+            }
+
+            await dbService.deleteItemById(User, user_id);
 
             await emailService.sendMail(
                 variables.EMAIL_FOR_TEST_LETTERS || userData.item.email,
@@ -119,15 +194,27 @@ module.exports = {
 
     updateById: async (req, res, next) => {
         try {
-            const {user_id} = req.params;
-            const userData = req.body;
+            const { user_id } = req.params;
+            let userData = req.body;
 
-            await userService.updateItemById(User, user_id, userData);
+            if (req.files && req.files.avatar) {
+                const userInDB = await dbService.findItemById(User, user_id);
+
+                if (userInDB.avatar) {
+                    await s3Service.deleteFile(userInDB.avatar);
+                }
+
+                const s3Response = await s3Service.uploadFile(req.files.avatar, databaseTablesEnum.USER, user_id);
+
+                userData = { ...userData, avatar: s3Response.Location };
+            }
+
+            await dbService.updateItemById(User, user_id, userData);
 
             await emailService.sendMail(
                 variables.EMAIL_FOR_TEST_LETTERS || userData.item.email,
                 ACCOUNT_UPDATE,
-                {userName: userData.name || userData.item.name}
+                { userName: userData.name || userData.item.name }
             );
 
             res.status(statusCodes.updated).json(statusMessages.updated);

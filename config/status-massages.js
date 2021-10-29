@@ -1,18 +1,26 @@
 module.exports = {
     activatedAccount: 'Account was activated',
-    created: 'Item is created',
-    deleted: 'Item is deleted',
-    emailExists: 'Email is already exist',
-    forbidden: 'Forbidden',
-    invalidToken: 'Invalid token',
-    itemAlreadyExists: 'Is already exist',
     notActivatedAccount: 'Your account was not activated',
     notFound: 'Not Found',
-    notLogined: 'Email or password is wrong',
+
+    itemAlreadyExists: 'Is already exist',
+    emailExists: 'Email is already exist',
+    modelExists: 'Model is already exist',
+
+    tooBigFile: 'File is too big',
+    wrongFileFormat: 'Wrong file format',
+
+    forbidden: 'Forbidden',
+    invalidToken: 'Invalid token',
     noToken: 'No token',
-    paswordUpdated: 'Password is updated',
+    corsNotAllowed: 'CORS not allowed',
+
+    created: 'Item is created',
     updated: 'Item is updated',
+    deleted: 'Item is deleted',
+
+    paswordUpdated: 'Password is updated',
+    notLogined: 'Email or password is wrong',
     wrongTemplate: 'wrong template name',
-    corsNotAllowed: 'CORS is not allowed',
-    modelExists: 'Model is already exist'
+    emailWasSended: 'Email with token was sended'
 };
