@@ -1,17 +1,17 @@
 const mongoose = require("mongoose");
 
-const mongoDBURL = 'mongodb+srv://ihor:volodya1@cluster0.8ej0u.mongodb.net/mern-rooms'
+const mongoURL = 'mongodb+srv://ihor:volodya1@cluster0.8ej0u.mongodb.net/mern-pizza'
 
-mongoose.connect(mongoDBURL , {useUnifiedTopology:true , useNewUrlParser:true})
+mongoose.connect(mongoURL , {useUnifiedTopology:true , useNewUrlParser:true})
 
-const dbconnect = mongoose.connection
+const db = mongoose.connection
 
-dbconnect.on('error' , ()=>{
-    console.log(`Mongo DB Connection Failed`);
+db.on('connected' , ()=>{
+    console.log('Mongo DB Connection Successfull');
 })
 
-dbconnect.on('connected' , ()=>{
-    console.log(`Mongo DB Connection Successfull`);
+db.on('error' , ()=>{
+    console.log(`Mongo DB Connection failed`);
 })
 
-module.exports = mongoose
+module.exports =mongoose

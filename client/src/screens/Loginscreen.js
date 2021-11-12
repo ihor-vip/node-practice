@@ -1,18 +1,16 @@
 import React, { useState, useEffect } from "react";
 import {useDispatch , useSelector} from 'react-redux'
-import axios from "axios";
+import { loginUser } from "../actions/userActions";
 import Error from "../components/Error";
-import Loader from "../components/Loader";
-import Success from "../components/Success";
-import Swal from 'sweetalert2'
+import Loading from "../components/Loading";
 export default function Loginscreen() {
 
 
     const [email, setemail] = useState("");
     const [password, setpassword] = useState("");
-    const[loading, setloading]=useState(false)
-    const[error, seterror]=useState(false)
-    const[success, setsuccess]=useState(false)
+    const loginstate = useSelector(state=>state.loginUserReducer)
+    const {loading , error} = loginstate
+    const dispatch = useDispatch()
 
     useEffect(() => {
 
@@ -23,23 +21,9 @@ export default function Loginscreen() {
 
     }, [])
 
-    async function login(){
-        const user={
-
-            email,
-            password
-        }
-        try {
-            setloading(true)
-            const result = await (await axios.post('/api/users/login',user)).data
-            localStorage.setItem('currentUser',JSON.stringify(result))
-            window.location.href='/'
-        } catch (error) {
-            seterror(true)
-            setloading(false)
-            console.log(error);
-
-        }
+    function login(){
+        const user={email , password}
+        dispatch(loginUser(user))
     }
 
     return (
@@ -50,21 +34,21 @@ export default function Loginscreen() {
                         Login
                     </h2>
 
-                    {loading && (<Loader/>)}
+                    {loading && (<Loading/>)}
                     {error && (<Error error='Invalid Credentials'/>)}
-                    {success && (<Success success='User Login Successfull'/>)}
+
                     <div>
-                        <input required type="text" placeholder="email" className="form-control mt-1" value={email} onChange={(e)=>{setemail(e.target.value)}} />
+                        <input required type="text" placeholder="email" className="form-control" value={email} onChange={(e)=>{setemail(e.target.value)}} />
                         <input
                             type="text"
                             placeholder="password"
-                            className="form-control mt-1"
+                            className="form-control"
                             value={password}
                             required
                             onChange={(e)=>{setpassword(e.target.value)}}
                         />
 
-                        <button onClick={login} className="btn btn-success mt-3 mb-3 rounded-pill">LOGIN</button>
+                        <button onClick={login} className="btn mt-3 mb-3">LOGIN</button>
                         <br/>
                         <a style={{color:'black'}} href="/register" className="mt-2">Click Here To Register</a>
                     </div>

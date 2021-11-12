@@ -1,20 +1,20 @@
 import React from "react";
-
-function Navbar() {
-
-    function logout() {
-        localStorage.removeItem('currentUser')
-        window.location.href='/login'
-    }
-
+import { useSelector, useDispatch } from "react-redux";
+import { logoutUser } from "../actions/userActions";
+export default function Navbar() {
+    const cartstate = useSelector((state) => state.cartReducer);
+    const userstate = useSelector((state) => state.loginUserReducer);
+    const { currentUser } = userstate;
+    const dispatch = useDispatch()
     return (
         <div>
-            <nav class="navbar navbar-expand-lg">
-                <a class="navbar-brand" href="/">
-                    Booking.com
+            <nav className="navbar navbar-expand-lg shadow-lg p-3 mb-5 bg-white rounded">
+                <a className="navbar-brand" href="/">
+                    Pizza Hut
+                    <img src='data:image/png;base64,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' style={{height:'60px'}}/>
                 </a>
                 <button
-                    class="navbar-toggler"
+                    className="navbar-toggler"
                     type="button"
                     data-toggle="collapse"
                     data-target="#navbarNav"
@@ -22,46 +22,36 @@ function Navbar() {
                     aria-expanded="false"
                     aria-label="Toggle navigation"
                 >
-                    <span class="navbar-toggler-icon"><i className='fa fa-bars' style={{color: 'white'}}></i></span>
+                    <span className="navbar-toggler-icon"><i style={{color:'black'}} className="fas fa-bars"></i></span>
                 </button>
-                <div class="collapse navbar-collapse " id="navbarNav">
-
-
-
-
-                    <ul class="navbar-nav ml-auto">
-
-                        {localStorage.getItem('currentUser') ? (
-                            <div class="dropdown mr-5">
-                                <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                    <i class="fa fa-user" aria-hidden="true"></i>  {JSON.parse(localStorage.getItem('currentUser')).name}
-                                </button>
-                                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                                    <a class="dropdown-item" href="/profile">Profile</a>
-                                    <a class="dropdown-item" href="#" onClick={logout}>Logout</a>
+                <div className="collapse navbar-collapse" id="navbarNav">
+                    <ul className="navbar-nav ml-auto">
+                        {currentUser ? (
+                            <div className="dropdown mt-2">
+                                <a style={{color:'black'}} className="dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    {currentUser.name}
+                                </a>
+                                <div className="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                    <a className="dropdown-item" href="/orders">Orders</a>
+                                    <a className="dropdown-item" href="#" onClick={()=>{dispatch(logoutUser())}}><li>Logout</li></a>
                                 </div>
                             </div>
-
                         ) : (
-                            <>
-                                <li class="nav-item active">
-                                    <a class="nav-link" href="/register">
-                                        Register
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" href="/login">
-                                        Login
-                                    </a>
-                                </li>
-                            </>
+                            <li className="nav-item">
+                                <a className="nav-link" href="/login">
+                                    Login
+                                </a>
+                            </li>
                         )}
 
+                        <li className="nav-item">
+                            <a className="nav-link" href="/cart">
+                                Cart {cartstate.cartItems.length}
+                            </a>
+                        </li>
                     </ul>
                 </div>
             </nav>
         </div>
     );
 }
-
-export default Navbar;

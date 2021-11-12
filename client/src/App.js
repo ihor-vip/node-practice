@@ -1,32 +1,33 @@
-import logo from "./logo.svg";
-import "./App.css";
-import {BrowserRouter, Route , path} from 'react-router-dom'
-import Homescreen from "./screens/Homescreen";
-import Navbar from "./components/Navbar";
-import Loginscreen from "./screens/Loginscreen";
-import Registerscreen from "./screens/Registerscreen";
-import 'antd/dist/antd.css';
-import Bookingscreen from "./screens/Bookingscreen";
-import Profilescreen from "./screens/Profilescreen";
-import Landingscreen from "./screens/Landingscreen";
-import Adminscreen from "./screens/Adminscreen";
-
+import logo from './logo.svg';
+import './App.css';
+import bootstrap from '../node_modules/bootstrap/dist/css/bootstrap.min.css'
+import 'bootstrap'
+import {BrowserRouter , Route , Link , Switch } from 'react-router-dom'
+import Navbar from './components/Navbar';
+import Homescreen from './screens/Homescreen';
+import Cartscreen from './screens/Cartscreen'
+import Registerscreen from './screens/Registerscreen';
+import Loginscreen from './screens/Loginscreen';
+import Ordersscreen from './screens/Ordersscreen';
+import Adminscreen from './screens/Adminscreen';
 function App() {
-  return (
-      <div className="App">
-        <Navbar />
-        <BrowserRouter>
+    return (
+        <div className="App">
+            <Navbar/>
 
-          <Route path="/" exact component={Landingscreen}/>
-          <Route path="/home" exact component={Homescreen}/>
-          <Route path="/login" component={Loginscreen}/>
-          <Route path="/register" component={Registerscreen}/>
-          <Route path="/book/:roomid/:fromdate/:todate" component={Bookingscreen}/>
-          <Route path="/profile" component={Profilescreen}/>
-          <Route path="/admin" component={Adminscreen}/>
-        </BrowserRouter>
-      </div>
-  );
+            <BrowserRouter>
+
+                <Route path="/" exact component={Homescreen} />
+                <Route path="/cart" exact component={Cartscreen}/>
+                <Route path="/register" exact component={Registerscreen}/>
+                <Route path='/login' exact component={Loginscreen}/>
+                <Route path='/orders' exact component={Ordersscreen}/>
+                <Route path='/admin' component={Adminscreen}/>
+
+            </BrowserRouter>
+
+        </div>
+    );
 }
 
 export default App;
