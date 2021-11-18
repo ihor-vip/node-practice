@@ -1,0 +1,32 @@
+{
+  "users": [
+    {
+      "name": "Steve McRoorkee",
+      "username": "steve123",
+      "email": "steve@gmail.com",
+      "phone": "4563214530",
+      "id": 1
+    },
+    {
+      "name": "Matt Damon",
+      "username": "matt123",
+      "email": "matt@gmail.com",
+      "phone": "7896547896",
+      "id": 4
+    },
+    {
+      "name": "Sophie Lee",
+      "username": "sophie123",
+      "email": "sophie@gmail.com",
+      "phone": "7458965874",
+      "id": 5
+    },
+    {
+      "name": "John Black",
+      "username": "john123",
+      "email": "john@gmail.com",
+      "phone": "4569874563",
+      "id": 6
+    }
+  ]
+}
